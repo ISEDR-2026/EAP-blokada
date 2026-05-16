@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EAP Simulator v8.1 - Station Names & Fixed Arrows</title>
+    <title>EAP Simulator v8.2 - Station Signs in Track Layout</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Azeret+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -127,12 +127,10 @@
         .eap-display { display: flex; justify-content: space-around; align-items: center; margin: 15px 0; background: #777; padding: 12px; border: 3px inset #555; }
         .station-arrows { display: flex; gap: 10px; align-items: center; background: #444; padding: 10px 20px; border-radius: 5px; }
         
-        /* Strzałki blokady i kółka */
         .arrow-shape { position: relative; width: 85px; height: 22px; background: #2a2a2a; display: flex; align-items: center; padding: 0 5px; gap: 3px; }
         .arrow-right { clip-path: polygon(0% 20%, 65% 20%, 65% 0%, 100% 50%, 65% 100%, 65% 80%, 0% 80%); justify-content: flex-start; }
         .arrow-left { clip-path: polygon(100% 20%, 35% 20%, 35% 0%, 0% 50%, 35% 100%, 35% 80%, 100% 80%); justify-content: flex-end; }
         
-        /* Poprawiony układ kółek: duże kółko na grocie, małe na ogonie */
         .arrow-right .dot-big { order: 5; margin-left: auto; margin-right: 5px; width: 14px; height: 14px; }
         .arrow-left .dot-big { order: 1; margin-right: auto; margin-left: 5px; width: 14px; height: 14px; }
         
@@ -145,7 +143,7 @@
         @keyframes blinker { 50% { opacity: 0.1; } }
         
         .controls { display: flex; justify-content: space-between; gap: 15px; }
-        .panel { flex: 1; background: #b0b0b0; padding: 15px; border: 1px solid #777; border-radius: 5px; display: flex; flex-direction: column; gap: 15px; position: relative; min-height: 160px; }
+        .panel { flex: 1; background: #b0b0b0; padding: 15px; border: 1px solid #777; border-radius: 5px; display: flex; flex-direction: column; gap: 15px; position: relative; min-height: 120px; }
         .row { display: flex; gap: 15px; align-items: flex-end; }
         .btn-unit { display: flex; flex-direction: column; align-items: center; min-width: 50px; z-index: 2; }
         .label { font-size: 11px; font-weight: bold; margin-bottom: 3px; }
@@ -155,7 +153,6 @@
         .btn-round:disabled { opacity: 0.2; }
         .btn-round::after { content: ''; position: absolute; top: 15%; left: 15%; width: 70%; height: 70%; background: radial-gradient(circle, #666, #111); border-radius: 50%; }
         
-        /* Custom Button Colors */
         .btn-green { border-color: #0c5c11; }
         .btn-green::after { background: radial-gradient(circle, #2ecc71, #0f5213) !important; }
         
@@ -165,7 +162,7 @@
         .lamp-dioda { width: 14px; height: 14px; border-radius: 50%; background: #333; border: 1px solid #000; margin-bottom: 4px; }
         .lamp-dioda.blue { background: #00bfff; box-shadow: 0 0 15px #00bfff; }
         
-        /* Kolejowe tablice z nazwami stacji */
+        /* Kolejowe tablice przeniesione do makiety torowej */
         .station-sign {
             position: absolute;
             background-color: #003399;
@@ -178,10 +175,11 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             border-radius: 2px;
             letter-spacing: 0.5px;
-            z-index: 1;
+            z-index: 10;
+            bottom: 10px;
         }
-        .sign-left { bottom: 10px; left: 15px; }
-        .sign-right { bottom: 10px; right: 15px; }
+        .sign-left { left: 15px; }
+        .sign-right { right: 15px; }
 
         #log { background: #000; color: #0f0; font-family: 'Azeret Mono', monospace; padding: 12px; margin-top: 15px; height: 140px; border-left: 5px solid #0f0; overflow-y: auto; font-size: 12px; scroll-behavior: smooth; }
         .log-line { margin-bottom: 4px; border-bottom: 1px solid #1a1a1a; padding-bottom: 2px; }
@@ -230,6 +228,9 @@
             <div class="eon-boundary b-right"></div>
             <div class="eon-label">EON</div>
         </div>
+
+        <div class="station-sign sign-left">Leśna</div>
+        <div class="station-sign sign-right">Polna</div>
     </div>
 
     <div class="eap-display">
@@ -265,7 +266,6 @@
                 <div class="btn-unit"><div id="K_A" class="lamp-dioda"></div><button id="B_A_Blk" class="btn-round" onclick="triggerBtn('Blk','A')"></button><span class="label">KoGw</span></div>
                 <div class="btn-unit" style="margin-left:40px"><button id="B_A_Wbl" class="btn-round" onclick="triggerBtn('Wbl','A')"></button><span class="label">Wbl</span></div>
             </div>
-            <div class="station-sign sign-left">Leśna</div>
         </div>
         <div class="panel">
             <div class="row">
@@ -280,7 +280,6 @@
                 <div class="btn-unit"><button id="B_B_Wbl" class="btn-round" onclick="triggerBtn('Wbl','B')"></button><span class="label">Wbl</span></div>
                 <div class="btn-unit" style="margin-left:40px"><div id="K_B" class="lamp-dioda"></div><button id="B_B_Blk" class="btn-round" onclick="triggerBtn('Blk','B')"></button><span class="label">KoAw</span></div>
             </div>
-            <div class="station-sign sign-right">Polna</div>
         </div>
     </div>
     <div id="log"></div>
@@ -412,7 +411,7 @@
         const t = document.getElementById('train-core');
         t.style.left = prev.trainPos; t.style.display = prev.trainDisplay; t.innerHTML = prev.trainHTML;
         prev.signals.forEach(s => { const el = document.getElementById(s.id); if(el) el.className = s.className; });
-        prev.eonClasses.forEach(e => { const el = document.getElementById(e.id); if(el) el.className = s.className; });
+        prev.eonClasses.forEach(e => { const el = document.getElementById(e.id); if(el) el.className = e.className; });
         changeState(States[prev.stateName], false);
         updateEONVisibility();
         if (history.length === 0) document.getElementById('btn-undo').disabled = true;
@@ -658,7 +657,7 @@
                 msg("UŻYTO PRZYCISKU DPO");
             },
             setupView: function() { enableBtn(`B_${dir}_dPo`); enableBtn(`B_${dir}_Poz`); enableBtn(`B_${dir}_Sz`); },
-            handleGo: function() { msg("POCIĄG WYJEŻDŻA NA SZLAK NA SYGNAŁ ZASTĘPCZY"); updatePulpitView(); startTrainMovement( () => { setSig(dir, 'Wy', 'red'); }, () => { changeState(States.STAN_OCZEKIWANIE_NA_WJAZD_PO_ZIELONYM()); }, null, null ); },
+            handleGo: function() { msg("POCIĄG WYJEŻDŻA NA SZLAKNA SYGNAŁ ZASTĘPCZY"); updatePulpitView(); startTrainMovement( () => { setSig(dir, 'Wy', 'red'); }, () => { changeState(States.STAN_OCZEKIWANIE_NA_WJAZD_PO_ZIELONYM()); }, null, null ); },
             on_Sz: function(st) { if(st === dir) { increment('Sz', st); setSig(dir, 'Wy', 'white-blink'); msg("WYJAZD NA SZ: PONOWNE PODANIE SYGNAŁU ZASTĘPCZEGO IN dPo."); } },
             on_Poz: function(st) { if (st === dir) { changeState(States.STAN_BLOKADA_WZBUDZONA); msg("POZ: DROGA ROZWIĄZANA AWARYJNIE."); } },
             on_dPo: function(st) { if(st === dir) { increment('dPo', st); pwlFlash = true; setTimeout(() => { pwlFlash = false; updatePulpitView(); }, 300); } }
