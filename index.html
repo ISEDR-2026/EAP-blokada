@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EAP Simulator v7.9 - Fix KoP & EON Labels</title>
+    <title>EAP Simulator v8.0 - PKP Nomenclature Standards</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Azeret+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -162,8 +162,8 @@
     <div class="track-layout">
         <div class="main-track"></div>
 
-        <div class="signal-box" style="top: 25px; left: 130px;"><span class="sig-label">WyA</span><div class="signal"><div id="L_WyA_G" class="light"></div><div id="L_WyA_R" class="light red"></div><div id="L_WyA_W" class="light"></div></div></div>
-        <div class="signal-box" style="top: 25px; left: 310px;"><span class="sig-label">WjA</span><div class="signal"><div id="L_WjA_G" class="light"></div><div id="L_WjA_R" class="light red"></div><div id="L_WjA_W" class="light"></div></div></div>
+        <div class="signal-box" style="top: 25px; left: 130px;"><span class="sig-label">H1</span><div class="signal"><div id="L_WyA_G" class="light"></div><div id="L_WyA_R" class="light red"></div><div id="L_WyA_W" class="light"></div></div></div>
+        <div class="signal-box" style="top: 25px; left: 310px;"><span class="sig-label">A</span><div class="signal"><div id="L_WjA_G" class="light"></div><div id="L_WjA_R" class="light red"></div><div id="L_WjA_W" class="light"></div></div></div>
 
         <div id="EON_WyA" class="eon-container" style="left: 190px;">
             <div class="eon-boundary b-left"></div>
@@ -180,8 +180,8 @@
 
         <div id="train-core" class="train-container"></div>
 
-        <div class="signal-box" style="top: 25px; right: 310px;"><span class="sig-label">WjB</span><div class="signal"><div id="L_WjB_G" class="light"></div><div id="L_WjB_R" class="light red"></div><div id="L_WjB_W" class="light"></div></div></div>
-        <div class="signal-box" style="top: 25px; right: 130px;"><span class="sig-label">WyB</span><div class="signal"><div id="L_WyB_G" class="light"></div><div id="L_WyB_R" class="light red"></div><div id="L_WyB_W" class="light"></div></div></div>
+        <div class="signal-box" style="top: 25px; right: 310px;"><span class="sig-label">B</span><div class="signal"><div id="L_WjB_G" class="light"></div><div id="L_WjB_R" class="light red"></div><div id="L_WjB_W" class="light"></div></div></div>
+        <div class="signal-box" style="top: 25px; right: 130px;"><span class="sig-label">G1</span><div class="signal"><div id="L_WyB_G" class="light"></div><div id="L_WyB_R" class="light red"></div><div id="L_WyB_W" class="light"></div></div></div>
 
         <div id="EON_WjB" class="eon-container" style="right: 235px;">
             <div class="eon-boundary b-left"></div>
@@ -214,12 +214,12 @@
                 <div class="btn-unit"><span class="label">dKo</span><div id="cnt_dKo_A" class="counter">000</div><button id="B_A_dKo" class="btn-round" onclick="triggerBtn('dKo','A')"></button></div>
                 <div class="btn-unit"><span class="label">dPo</span><div id="cnt_dPo_A" class="counter">000</div><button id="B_A_dPo" class="btn-round" onclick="triggerBtn('dPo','A')"></button></div>
                 <div class="btn-unit" style="margin-left:10px"><span class="label">Poz</span><button id="B_A_Poz" class="btn-round" onclick="triggerBtn('Poz','A')"></button></div>
-                <div class="btn-unit"><span class="label">Wyj</span><button id="B_A_Wyj" class="btn-round" onclick="triggerBtn('Wyj','A')"></button></div>
-                <div class="btn-unit"><span class="label">Wj</span><button id="B_A_Wj" class="btn-round" onclick="triggerBtn('Wj','A')"></button></div>
+                <div class="btn-unit"><span class="label">H1w</span><button id="B_A_Wyj" class="btn-round" onclick="triggerBtn('Wyj','A')"></button></div>
+                <div class="btn-unit"><span class="label">Aw</span><button id="B_A_Wj" class="btn-round" onclick="triggerBtn('Wj','A')"></button></div>
                 <div class="btn-unit"><span class="label">Sz</span><div id="cnt_Sz_A" class="counter">000</div><button id="B_A_Sz" class="btn-round" onclick="triggerBtn('Sz','A')"></button></div>
             </div>
             <div class="row">
-                <div class="btn-unit"><div id="K_A" class="lamp-dioda"></div><button id="B_A_Blk" class="btn-round" onclick="triggerBtn('Blk','A')"></button><span class="label">KoP</span></div>
+                <div class="btn-unit"><div id="K_A" class="lamp-dioda"></div><button id="B_A_Blk" class="btn-round" onclick="triggerBtn('Blk','A')"></button><span class="label">Kow</span></div>
                 <div class="btn-unit" style="margin-left:40px"><button id="B_A_Wbl" class="btn-round" onclick="triggerBtn('Wbl','A')"></button><span class="label">Wbl</span></div>
             </div>
         </div>
@@ -228,13 +228,13 @@
                 <div class="btn-unit"><span class="label">Poz</span><button id="B_B_Poz" class="btn-round" onclick="triggerBtn('Poz','B')"></button></div>
                 <div class="btn-unit"><span class="label">dPo</span><div id="cnt_dPo_B" class="counter">000</div><button id="B_B_dPo" class="btn-round" onclick="triggerBtn('dPo','B')"></button></div>
                 <div class="btn-unit"><span class="label">dKo</span><div id="cnt_dKo_B" class="counter">000</div><button id="B_B_dKo" class="btn-round" onclick="triggerBtn('dKo','B')"></button></div>
-                <div class="btn-unit" style="margin-left:10px"><span class="label">Wj</span><button id="B_B_Wj" class="btn-round" onclick="triggerBtn('Wj','B')"></button></div>
-                <div class="btn-unit"><span class="label">Wyj</span><button id="B_B_Wyj" class="btn-round" onclick="triggerBtn('Wyj','B')"></button></div>
+                <div class="btn-unit" style="margin-left:10px"><span class="label">Bw</span><button id="B_B_Wj" class="btn-round" onclick="triggerBtn('Wj','B')"></button></div>
+                <div class="btn-unit"><span class="label">G1w</span><button id="B_B_Wyj" class="btn-round" onclick="triggerBtn('Wyj','B')"></button></div>
                 <div class="btn-unit"><span class="label">Sz</span><div id="cnt_Sz_B" class="counter">000</div><button id="B_B_Sz" class="btn-round" onclick="triggerBtn('Sz','B')"></button></div>
             </div>
             <div class="row">
                 <div class="btn-unit"><button id="B_B_Wbl" class="btn-round" onclick="triggerBtn('Wbl','B')"></button><span class="label">Wbl</span></div>
-                <div class="btn-unit" style="margin-left:40px"><div id="K_B" class="lamp-dioda"></div><button id="B_B_Blk" class="btn-round" onclick="triggerBtn('Blk','B')"></button><span class="label">KoP</span></div>
+                <div class="btn-unit" style="margin-left:40px"><div id="K_B" class="lamp-dioda"></div><button id="B_B_Blk" class="btn-round" onclick="triggerBtn('Blk','B')"></button><span class="label">Kow</span></div>
             </div>
         </div>
     </div>
@@ -595,7 +595,7 @@
         },
         STAN_ZWROT_DOZWOLONY_PO_DKO: {
             name: "STAN_ZWROT_DOZWOLONY_PO_DKO",
-            init: function() { const destStation = dir === 'A' ? 'B' : 'A'; setKoPLamp(destStation, true); msg("POCIĄG WJECHAŁ. BLOKADA KOŃCOWA ODBLOKOWANA NA STACJI " + destStation + ". MOŻNA ZWOLNIĆ BLOKADĘ (KOP)."); },
+            init: function() { const destStation = dir === 'A' ? 'B' : 'A'; setKoPLamp(destStation, true); msg("POCIĄG WJECHAŁ. BLOKADA KOŃCOWA ODBLOKOWANA NA STACJI " + destStation + ". MOŻNA ZWOLNIĆ BLOKADĘ (Kow)."); },
             setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_Blk`); },
             on_Blk: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { hardReset(); msg("ZWROT BLOKADY KOŃCOWEJ PO DKO ZAKOŃCZONY SUKCESEM. RESET SYSTEMU."); } }
         },
