@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EAP Simulator v8.3 - Fixed Arrows</title>
+    <title>EAP Simulator v8.4 - Fixed Train Visuals & Arrow Flow</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Azeret+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* [ZACHOWANO CSS Z V8.3 BEZ ZMIAN] */
         :root { 
             --pulpit: #a0a0a0; 
             --bg: #121212; 
@@ -150,7 +151,6 @@
 
         #btn-go { display: none; position: absolute; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 40px; font-size: 16px; font-weight: bold; color: white; background: #27ae60; border: 2px solid #218c4e; border-radius: 6px; cursor: pointer; z-index: 100; text-transform: uppercase; box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
 
-        /* BLOK STRZAŁEK BLOKADY EAP */
         .eap-display { 
             display: flex; 
             justify-content: space-around; 
@@ -162,20 +162,17 @@
         }
         .station-arrows { display: flex; gap: 15px; align-items: center; background: #444; padding: 10px 15px; border-radius: 5px; flex-wrap: wrap; justify-content: center; }
         
-        /* Nowa, czysta definicja strzałek */
         .arrow-shape { position: relative; width: 85px; height: 22px; background: #2a2a2a; display: flex; align-items: center; padding: 0 8px; gap: 4px; }
         .arrow-right { clip-path: polygon(0% 20%, 65% 20%, 65% 0%, 100% 50%, 65% 100%, 65% 80%, 0% 80%); justify-content: flex-start; }
         .arrow-left { clip-path: polygon(100% 20%, 35% 20%, 35% 0%, 0% 50%, 35% 100%, 35% 80%, 100% 80%); justify-content: flex-end; }
         
         .dot { width: 8px; height: 8px; border-radius: 50%; background: #111; transition: background 0.1s; }
         
-        /* Kolory diod */
         .dot.white { background: #fff; box-shadow: 0 0 8px #fff; }
         .dot.red { background: #f00; box-shadow: 0 0 8px #f00; }
         .blink { animation: blinker 0.7s linear infinite; }
         @keyframes blinker { 50% { opacity: 0.1; } }
         
-        /* Panele przycisków */
         .controls { 
             display: flex; 
             justify-content: space-between; 
@@ -349,6 +346,7 @@
 </div>
 
 <script>
+    /* LOGIKA SYMULATORA - POPRAWIONA KWESTIA WIZUALNA POCIĄGU */
     let dir = null; 
     let moveInterval = null;
     let pwlActive = false;
@@ -497,13 +495,18 @@
         document.getElementById('btn-go').style.display = showGo ? 'block' : 'none';
     }
 
+    /* POPRAWKA 1: POCIĄG ZATRZYMUJE SIĘ PRZED SEMAFORAMI I ODWRÓCENIE IKONY LOKOMOTYWY */
     function setupTrainGraphics() {
         const t = document.getElementById('train-core');
         t.style.display = 'block';
         if (dir === 'A') {
-            t.innerHTML = '🚃🚃🚂'; t.style.left = '5%';
+            // Jedzie w prawo: Wagon-Wagon-Lokomotywa(odwrócona w prawo)
+            t.innerHTML = '🚃🚃<span style="display:inline-block; transform: scaleX(-1);">🚂</span>'; 
+            t.style.left = '-12%'; // Start daleko przed F1
         } else {
-            t.innerHTML = '🚂🚃🚃'; t.style.left = '85%';
+            // Jedzie w lewo: Lokomotywa-Wagon-Wagon
+            t.innerHTML = '🚂🚃🚃'; 
+            t.style.left = '102%'; // Start daleko przed A1/2
         }
     }
 
@@ -515,16 +518,27 @@
             posPct += (dir === 'A' ? 0.8 : -0.8);
             t.style.left = posPct + '%';
             
+            // Czujniki Wyjazdowe EON (w połowie drogi)
             if (dir === 'A' && posPct >= 12 && posPct <= 17) document.getElementById('EON_WyA').classList.add('active');
             else if (document.getElementById('EON_WyA')) document.getElementById('EON_WyA').classList.remove('active');
             
             if (dir === 'B' && posPct <= 88 && posPct >= 83) document.getElementById('EON_WyB').classList.add('active');
             else if (document.getElementById('EON_WyB')) document.getElementById('EON_WyB').classList.remove('active');
 
-            if (((dir === 'A' && posPct > 13) || (dir === 'B' && posPct < 87))) { if(onPassedDepartureSig) { onPassedDepartureSig(); onPassedDepartureSig = null; } }
+            // Mijanie semaforów wyjazdowych (pociąg znika, EAP działa)
+            if (((dir === 'A' && posPct > 10) || (dir === 'B' && posPct < 90))) { if(onPassedDepartureSig) { onPassedDepartureSig(); onPassedDepartureSig = null; } }
             
-            if (dir === 'A' && posPct >= 68) { if(onReachedEntrySig) { clearInterval(moveInterval); onReachedEntrySig(); return; } }
-            if (dir === 'B' && posPct <= 32) { if(onReachedEntrySig) { clearInterval(moveInterval); onReachedEntrySig(); return; } }
+            // POPRAWKA: Zatrzymanie PRZED semaforami wjazdowymi
+            if (dir === 'A' && posPct >= 20) { // Przed G1/2 (24%)
+                clearInterval(moveInterval); 
+                t.style.left = '20%'; // Ustaw wizualnie przed semaforem
+                if(onReachedEntrySig) { onReachedEntrySig(); return; } 
+            }
+            if (dir === 'B' && posPct <= 28) { // Przed A1/2 (24%)
+                clearInterval(moveInterval); 
+                t.style.left = '28%'; // Ustaw wizualnie przed semaforem
+                if(onReachedEntrySig) { onReachedEntrySig(); return; } 
+            }
         }, 40);
     }
 
@@ -536,8 +550,9 @@
             posPct += (dir === 'A' ? 0.8 : -0.8);
             t.style.left = posPct + '%';
             
+            // Czujniki Wjazdowe EON
             if (dir === 'A') {
-                if (posPct >= 73 && posPct <= 81) {
+                if (posPct >= 20 && posPct <= 27) { // Wjazdowy EON przy G1/2
                     if (eonLockedStation === 'B') clearLockedEON('B');
                     document.getElementById('EON_WjB').classList.add('active');
                 } else {
@@ -546,7 +561,7 @@
             }
             
             if (dir === 'B') {
-                if (posPct <= 27 && posPct >= 19) {
+                if (posPct <= 28 && posPct >= 21) { // Wjazdowy EON przy A1/2
                     if (eonLockedStation === 'A') clearLockedEON('A');
                     document.getElementById('EON_WjA').classList.add('active');
                 } else {
@@ -554,8 +569,11 @@
                 }
             }
 
-            if (((dir === 'A' && posPct > 75) || (dir === 'B' && posPct < 25))) { if(onPassedEntrySig) { onPassedEntrySig(); onPassedEntrySig = null; } }
-            if ((dir === 'A' && posPct > 88) || (dir === 'B' && posPct < 12)) { clearInterval(moveInterval); t.style.display = 'none'; if(onStationArrived) onStationArrived(); }
+            // Mijanie semafora wjazdowego
+            if (((dir === 'A' && posPct > 24) || (dir === 'B' && posPct < 24))) { if(onPassedEntrySig) { onPassedEntrySig(); onPassedEntrySig = null; } }
+            
+            // Wjazd na stację i zniknięcie pociągu
+            if ((dir === 'A' && posPct > 35) || (dir === 'B' && posPct < 15)) { clearInterval(moveInterval); t.style.display = 'none'; if(onStationArrived) onStationArrived(); }
         }, 40);
     }
 
@@ -574,6 +592,7 @@
         updateEONVisibility();
     }
 
+    /* MASZYNA STANÓW SYSTEMU EAP */
     const States = {
         STAN_ZASADNICZY: {
             name: "STAN_ZASADNICZY",
