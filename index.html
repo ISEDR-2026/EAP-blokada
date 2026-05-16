@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EAP Simulator v7.7 - Accurate Train Stop</title>
+    <title>EAP Simulator v7.8 - Light Theme & EON Lock</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Azeret+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -11,8 +11,8 @@
         :root { 
             --pulpit: #a0a0a0; 
             --bg: #121212; 
-            --track-bg: #1e1e1e; 
-            --track-line: #555; 
+            --track-bg: #e0e0e0; /* Zmiana na jasno szare tło */
+            --track-line: #333333; /* Ciemniejsza linia toru dla kontrastu */
             --accent: #00bfff; 
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -29,7 +29,7 @@
             position: relative; 
         }
 
-        /* WIZUALIZACJA TORÓW - DARK MODE */
+        /* WIZUALIZACJA TORÓW - LIGHT MODE */
         .track-layout { 
             height: 180px; 
             border-bottom: 3px solid #333; 
@@ -38,6 +38,7 @@
             background: var(--track-bg); 
             overflow: hidden; 
             border-radius: 4px;
+            border: 1px solid #bbb;
         }
         
         /* Tor główny */
@@ -70,12 +71,13 @@
             height: 0;
             border-left: 10px solid transparent;
             border-right: 10px solid transparent;
-            border-top: 18px solid #000;
-            transition: all 0.2s ease;
+            border-top: 18px solid #222;
+            transition: all 0.1s ease;
         }
-        .eon-container.active .eon-triangle {
+        .eon-container.active .eon-triangle,
+        .eon-container.locked-active .eon-triangle {
             border-top-color: var(--accent);
-            filter: drop-shadow(0 0 8px var(--accent));
+            filter: drop-shadow(0 0 6px var(--accent));
         }
 
         /* Pionowe kreski graniczne po bokach trójkąta */
@@ -84,7 +86,7 @@
             top: 10px;
             width: 2px;
             height: 34px;
-            background: #888;
+            background: #444;
         }
         .eon-boundary.b-left { left: 0; }
         .eon-boundary.b-right { right: 0; }
@@ -95,10 +97,12 @@
             left: -10px;
             font-size: 10px;
             font-weight: bold;
-            color: #aaa;
+            color: #222; /* Ciemniejszy tekst na jasnym tle */
             font-family: 'Azeret Mono', monospace;
             width: 80px;
             text-align: center;
+            background: rgba(255,255,255,0.6);
+            border-radius: 2px;
         }
 
         /* POCIĄG */
@@ -257,6 +261,7 @@
     let counters = { dKo_A:0, dPo_A:0, Sz_A:0, dKo_B:0, dPo_B:0, Sz_B:0 };
     let history = [];
     let currentState = null;
+    let eonLockedStation = null; // Przechowuje informację, na której stacji zablokowano EON przyciskiem dKo
 
     function msg(t) { 
         const logBox = document.getElementById('log');
@@ -306,7 +311,12 @@
     function updateEONVisibility() {
         document.querySelectorAll('.eon-container').forEach(e => {
             e.style.display = 'none';
-            e.classList.remove('active');
+            // Nie czyścimy klasy locked-active automatycznie tutaj, dopóki pociąg jej nie skasuje
+            if (!e.classList.contains('locked-active')) {
+                e.classList.remove('active');
+            } else {
+                e.style.display = 'block'; // Wymuszamy widoczność stale świecącego EONu
+            }
         });
 
         if (dir === 'A' && currentState.name !== 'STAN_ZASADNICZY' && currentState.name !== 'STAN_ZADANIE_BLOKADY') {
@@ -318,17 +328,36 @@
         }
     }
 
+    // Funkcja do podświetlenia EONu po dKo
+    function lockEONActive(st) {
+        eonLockedStation = st;
+        const eonEl = document.getElementById(`EON_Wj${st}`);
+        if (eonEl) {
+            eonEl.classList.add('locked-active');
+            eonEl.style.display = 'block';
+        }
+    }
+
+    function clearLockedEON(st) {
+        const eonEl = document.getElementById(`EON_Wj${st}`);
+        if (eonEl) {
+            eonEl.classList.remove('locked-active');
+        }
+        if (eonLockedStation === st) eonLockedStation = null;
+    }
+
     function saveState() {
         const t = document.getElementById('train-core');
         history.push({
             stateName: currentState.name,
-            dir, pwlActive, pwlFlash,
+            dir, pwlActive, pwlFlash, eonLockedStation,
             counters: {...counters},
             logHTML: document.getElementById('log').innerHTML,
             trainPos: t.style.left,
             trainDisplay: t.style.display,
             trainHTML: t.innerHTML,
-            signals: Array.from(document.querySelectorAll('.light')).map(l => ({id: l.id, className: l.className}))
+            signals: Array.from(document.querySelectorAll('.light')).map(l => ({id: l.id, className: l.className})),
+            eonClasses: Array.from(document.querySelectorAll('.eon-container')).map(e => ({id: e.id, className: e.className}))
         });
         if (history.length > 30) history.shift();
         document.getElementById('btn-undo').disabled = false;
@@ -338,13 +367,14 @@
         if (history.length === 0) return;
         if(moveInterval) clearInterval(moveInterval);
         const prev = history.pop();
-        dir = prev.dir; pwlActive = prev.pwlActive; pwlFlash = prev.pwlFlash;
+        dir = prev.dir; pwlActive = prev.pwlActive; pwlFlash = prev.pwlFlash; eonLockedStation = prev.eonLockedStation;
         counters = prev.counters;
         document.getElementById('log').innerHTML = prev.logHTML;
         Object.keys(counters).forEach(k => { const el = document.getElementById(`cnt_${k}`); if(el) el.innerText = String(counters[k]).padStart(3, '0'); });
         const t = document.getElementById('train-core');
         t.style.left = prev.trainPos; t.style.display = prev.trainDisplay; t.innerHTML = prev.trainHTML;
         prev.signals.forEach(s => { const el = document.getElementById(s.id); if(el) el.className = s.className; });
+        prev.eonClasses.forEach(e => { const el = document.getElementById(e.id); if(el) el.className = e.className; });
         changeState(States[prev.stateName], false);
         updateEONVisibility();
         if (history.length === 0) document.getElementById('btn-undo').disabled = true;
@@ -399,7 +429,7 @@
 
             if (((dir === 'A' && posPct > 18) || (dir === 'B' && posPct < 82))) { if(onPassedDepartureSig) { onPassedDepartureSig(); onPassedDepartureSig = null; } }
             
-            // POPRAWKA: Zatrzymanie pociągu przed semaforem wjazdowym (65% dla A -> B, 35% dla B -> A, uwzględniając szerokość pociągu)
+            // Zatrzymanie pociągu przed semaforem wjazdowym
             if (dir === 'A' && posPct >= 64) { if(onReachedEntrySig) { clearInterval(moveInterval); onReachedEntrySig(); return; } }
             if (dir === 'B' && posPct <= 36) { if(onReachedEntrySig) { clearInterval(moveInterval); onReachedEntrySig(); return; } }
         }, 40);
@@ -413,12 +443,25 @@
             posPct += (dir === 'A' ? 0.8 : -0.8);
             t.style.left = posPct + '%';
             
-            // Animacja przejazdu przez EON Wjazdowy
-            if (dir === 'A' && posPct >= 78 && posPct <= 85) document.getElementById('EON_WjB').classList.add('active');
-            else if (document.getElementById('EON_WjB')) document.getElementById('EON_WjB').classList.remove('active');
+            // Animacja przejazdu przez EON Wjazdowy stacji końcowej
+            if (dir === 'A') {
+                if (posPct >= 78 && posPct <= 85) {
+                    // Jeśli świeciło się z dKo, to przejechanie pociągu gasi blokadę trwałego podświetlenia
+                    if (eonLockedStation === 'B') clearLockedEON('B');
+                    document.getElementById('EON_WjB').classList.add('active');
+                } else {
+                    document.getElementById('EON_WjB').classList.remove('active');
+                }
+            }
             
-            if (dir === 'B' && posPct <= 22 && posPct >= 15) document.getElementById('EON_WjA').classList.add('active');
-            else if (document.getElementById('EON_WjA')) document.getElementById('EON_WjA').classList.remove('active');
+            if (dir === 'B') {
+                if (posPct <= 22 && posPct >= 15) {
+                    if (eonLockedStation === 'A') clearLockedEON('A');
+                    document.getElementById('EON_WjA').classList.add('active');
+                } else {
+                    document.getElementById('EON_WjA').classList.remove('active');
+                }
+            }
 
             if (((dir === 'A' && posPct > 77) || (dir === 'B' && posPct < 23))) { if(onPassedEntrySig) { onPassedEntrySig(); onPassedEntrySig = null; } }
             if ((dir === 'A' && posPct > 88) || (dir === 'B' && posPct < 12)) { clearInterval(moveInterval); t.style.display = 'none'; if(onStationArrived) onStationArrived(); }
@@ -427,10 +470,11 @@
 
     function hardReset() {
         if(moveInterval) clearInterval(moveInterval);
-        dir = null; pwlActive = false; pwlFlash = false;
+        dir = null; pwlActive = false; pwlFlash = false; eonLockedStation = null;
         document.querySelectorAll('.light').forEach(l => l.className = 'light');
         document.querySelectorAll('.light[id*=\"_R\"]').forEach(l => l.className = 'light red');
         document.getElementById('train-core').style.display = 'none';
+        document.querySelectorAll('.eon-container').forEach(e => { e.classList.remove('active'); e.classList.remove('locked-active'); });
         setKoPLamp('A', false); setKoPLamp('B', false);
         setDots('arr_A_right', ''); setDots('arr_A_left', ''); setDots('arr_B_right', ''); setDots('arr_B_left', '');
         document.getElementById('log').innerHTML = "";
@@ -493,7 +537,7 @@
                 setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_Wj`); enableBtn(`B_${destStation}_dKo`); },
                 on_Wj: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { setSig(destStation, 'Wj', 'green'); changeState(States.STAN_WJAZD_NA_ZIELONE_RUCH); msg("PODANO SYGNAŁ ZEZWALAJĄCY NA WJAZD"); } },
                 on_Sz: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { increment('Sz', st); setSig(destStation, 'Wj', 'white-blink'); changeState(States.STAN_WJAZD_NA_SZ_WARIANT_MIESZANY); msg("WJAZD: PODANO SYGNAŁ ZASTĘPCZY."); } },
-                on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if(st === destStation) { increment('dKo', st); } }
+                on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if(st === destStation) { increment('dKo', st); lockEONActive(st); msg("UŻYTO PRZYCISKU DKO PRZED WJAZDEM. EON WJAZDOWY PODŚWIETLONY."); } }
             };
         },
         STAN_WJAZD_NA_ZIELONE_RUCH: {
@@ -501,7 +545,7 @@
             showGoBtn: true,
             setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_dKo`); },
             handleGo: function() { const destStation = dir === 'A' ? 'B' : 'A'; msg("POCIĄG WJEŻDŻA PŁYNNIE W STACJĘ KOŃCOWĄ. ODBLOKOWAŁA SIĘ ZASTAWKA NAD BLOKIEM KOŃCOWYM"); updatePulpitView(); resumeTrainMovement( () => { setSig(destStation, 'Wj', 'red'); }, () => { changeState(States.STAN_KONCOWY_AUTOMAT_KOP); } ); },
-            on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if(st === destStation) { increment('dKo', st); } }
+            on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if(st === destStation) { increment('dKo', st); lockEONActive(st); msg("UŻYTO PRZYCISKU DKO W TRAKCIE RUCHU. EON WJAZDOWY PODŚWIETLONY."); } }
         },
         STAN_KONCOWY_AUTOMAT_KOP: {
             name: "STAN_KONCOWY_AUTOMAT_KOP",
@@ -525,21 +569,22 @@
                 setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_Wj`); enableBtn(`B_${destStation}_dKo`); },
                 on_Wj: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { setSig(destStation, 'Wj', 'green'); changeState(States.STAN_WJAZD_NA_ZIELONE_PO_SZ_WYJEZDZIE); msg("PODANO SYGNAŁ ZEZWALAJĄCY NA WJAZD"); } },
                 on_Sz: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { increment('Sz', st); setSig(destStation, 'Wj', 'white-blink'); changeState(States.STAN_WJAZD_NA_SZ_CZYST_Z_DKO); msg("WJAZD: PODANO SYGNAŁ ZASTĘPCZY."); } },
-                on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if(st === destStation) { increment('dKo', st); } }
+                on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if(st === destStation) { increment('dKo', st); lockEONActive(st); msg("UŻYTO PRZYCISKU DKO. EON WJAZDOWY PODŚWIETLONY STALE."); } }
             };
         },
         STAN_WJAZD_NA_ZIELONE_PO_SZ_WYJEZDZIE: {
             name: "STAN_WJAZD_NA_ZIELONE_PO_SZ_WYJEZDZIE",
             showGoBtn: true,
             setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_dKo`); },
-            handleGo: function() { const destStation = dir === 'A' ? 'B' : 'A'; msg("POCIĄG WJEŻDŻA PŁYNNIE W STACJĘ KOŃCOWĄ. ODBLOKOWAŁA SIĘ ZASTAWKA NAD BLOKIEM KOŃCOWYM"); updatePulpitView(); resumeTrainMovement( null, () => { setSig(destStation, 'Wj', 'red'); }, () => { changeState(States.STAN_BLOKADA_UWIĘZIONA_WARIANT_MIESZANY); } ); }
+            handleGo: function() { const destStation = dir === 'A' ? 'B' : 'A'; msg("POCIĄG WJEŻDŻA PŁYNNIE W STACJĘ KOŃCOWĄ. ODBLOKOWAŁA SIĘ ZASTAWKA NAD BLOKIEM KOŃCOWYM"); updatePulpitView(); resumeTrainMovement( null, () => { setSig(destStation, 'Wj', 'red'); }, () => { changeState(States.STAN_BLOKADA_UWIĘZIONA_WARIANT_MIESZANY); } ); },
+            on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if(st === destStation) { increment('dKo', st); lockEONActive(st); } }
         },
         STAN_WJAZD_NA_SZ_WARIANT_MIESZANY: {
             name: "STAN_WJAZD_NA_SZ_WARIANT_MIESZANY",
             showGoBtn: true,
             setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_dKo`); },
             handleGo: function() { const destStation = dir === 'A' ? 'B' : 'A'; msg("POCIĄG WJEŻDŻA PŁYNNIE NA SYGNAŁ ZASTĘPCZY."); updatePulpitView(); resumeTrainMovement( () => { setSig(destStation, 'Wj', 'red'); }, () => { changeState(States.STAN_BLOKADA_UWIĘZIONA_WARIANT_MIESZANY); } ); },
-            on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { increment('dKo', st); setKoPLamp(destStation, true); changeState(States.STAN_WJAZD_NA_SZ_WARIANT_MIESZANY_Z_DKO); msg("UŻYTO PRZYCISKU DKO WŁĄCZONO CZUJNIK ZA SEMAFOREM WJAZDOWYM"); } }
+            on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { increment('dKo', st); setKoPLamp(destStation, true); lockEONActive(st); changeState(States.STAN_WJAZD_NA_SZ_WARIANT_MIESZANY_Z_DKO); msg("UŻYTO PRZYCISKU DKO WŁĄCZONO CZUJNIK ZA SEMAFOREM WJAZDOWYM"); } }
         },
         STAN_WJAZD_NA_SZ_WARIANT_MIESZANY_Z_DKO: {
             name: "STAN_WJAZD_NA_SZ_WARIANT_MIESZANY_Z_DKO",
@@ -552,11 +597,12 @@
             name: "STAN_BLOKADA_UWIĘZIONA_WARIANT_MIESZANY",
             init: function() { const destStation = dir === 'A' ? 'B' : 'A'; setKoPLamp(destStation, false); msg("BLOKADA JEST ZABLOKOWANA"); msg("BLOKADA UWIĘZIONA NA STACJI " + destStation + "! WJAZD NA Sz BEZ dKo."); },
             setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_dKo`); },
-            on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { increment('dKo', st); changeState(States.STAN_ZWROT_DOZWOLONY_PO_DKO); } }
+            on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { increment('dKo', st); lockEONActive(st); changeState(States.STAN_ZWROT_DOZWOLONY_PO_DKO); } }
         },
         STAN_WJAZD_NA_SZ_CZYST_Z_DKO: {
             name: "STAN_WJAZD_NA_SZ_CZYST_Z_DKO",
             showGoBtn: true,
+            init: function() { const destStation = dir === 'A' ? 'B' : 'A'; lockEONActive(destStation); },
             setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_Blk`); },
             handleGo: function() { const destStation = dir === 'A' ? 'B' : 'A'; msg("POCIĄG WJEŻDŻA PŁYNNIE (Sz + dKo)."); updatePulpitView(); resumeTrainMovement( () => { setSig(destStation, 'Wj', 'red'); }, () => { changeState(States.STAN_ZWROT_DOZWOLONY_PO_DKO); } ); },
             on_Blk: function(st) { msg("POCIĄG JESZCZE NIE WJECHAŁ CAŁKOWICIE."); }
