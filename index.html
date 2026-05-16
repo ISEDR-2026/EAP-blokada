@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EAP Simulator v7.8 - Light Theme & EON Lock</title>
+    <title>EAP Simulator v7.9 - Fix KoP & EON Labels</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Azeret+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -11,8 +11,8 @@
         :root { 
             --pulpit: #a0a0a0; 
             --bg: #121212; 
-            --track-bg: #e0e0e0; /* Zmiana na jasno szare tło */
-            --track-line: #333333; /* Ciemniejsza linia toru dla kontrastu */
+            --track-bg: #e0e0e0; 
+            --track-line: #333333; 
             --accent: #00bfff; 
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -29,7 +29,6 @@
             position: relative; 
         }
 
-        /* WIZUALIZACJA TORÓW - LIGHT MODE */
         .track-layout { 
             height: 180px; 
             border-bottom: 3px solid #333; 
@@ -41,7 +40,6 @@
             border: 1px solid #bbb;
         }
         
-        /* Tor główny */
         .main-track { 
             position: absolute; 
             top: 100px; 
@@ -52,7 +50,6 @@
             z-index: 1; 
         }
 
-        /* KONTENER CZUJNIKA EON */
         .eon-container {
             position: absolute;
             top: 73px;
@@ -62,7 +59,6 @@
             display: none; 
         }
         
-        /* Trójkąt wycentrowany */
         .eon-triangle {
             position: absolute;
             left: 20px;
@@ -80,7 +76,6 @@
             filter: drop-shadow(0 0 6px var(--accent));
         }
 
-        /* Pionowe kreski graniczne po bokach trójkąta */
         .eon-boundary {
             position: absolute;
             top: 10px;
@@ -97,7 +92,7 @@
             left: -10px;
             font-size: 10px;
             font-weight: bold;
-            color: #222; /* Ciemniejszy tekst na jasnym tle */
+            color: #222; 
             font-family: 'Azeret Mono', monospace;
             width: 80px;
             text-align: center;
@@ -105,7 +100,6 @@
             border-radius: 2px;
         }
 
-        /* POCIĄG */
         .train-container { 
             position: absolute; 
             bottom: 73px; 
@@ -120,7 +114,6 @@
             pointer-events: none; 
         }
 
-        /* SEMAFORY */
         .signal-box { position: absolute; width: 45px; display: flex; flex-direction: column; align-items: center; z-index: 10; }
         .sig-label { font-size: 11px; font-weight: bold; background: #222; color: #fff; padding: 1px 4px; border: 1px solid #555; margin-bottom: 2px; border-radius: 2px; }
         .signal { width: 16px; height: 48px; background: #000; border-radius: 3px; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 2px 0; border: 1px solid #444; }
@@ -131,7 +124,6 @@
 
         #btn-go { display: none; position: absolute; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 40px; font-size: 16px; font-weight: bold; color: white; background: #27ae60; border: 2px solid #218c4e; border-radius: 6px; cursor: pointer; z-index: 100; text-transform: uppercase; box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
 
-        /* DOLNY PANEL */
         .eap-display { display: flex; justify-content: space-around; align-items: center; margin: 15px 0; background: #777; padding: 12px; border: 3px inset #555; }
         .station-arrows { display: flex; gap: 10px; align-items: center; background: #444; padding: 10px 20px; border-radius: 5px; }
         .arrow-shape { position: relative; width: 70px; height: 22px; background: #2a2a2a; display: flex; align-items: center; padding: 0 5px; gap: 3px; }
@@ -177,13 +169,13 @@
             <div class="eon-boundary b-left"></div>
             <div class="eon-triangle"></div>
             <div class="eon-boundary b-right"></div>
-            <div class="eon-label">EON WyA</div>
+            <div class="eon-label">EON</div>
         </div>
         <div id="EON_WjA" class="eon-container" style="left: 235px;">
             <div class="eon-boundary b-left"></div>
             <div class="eon-triangle"></div>
             <div class="eon-boundary b-right"></div>
-            <div class="eon-label">EON WjA</div>
+            <div class="eon-label">EON</div>
         </div>
 
         <div id="train-core" class="train-container"></div>
@@ -195,13 +187,13 @@
             <div class="eon-boundary b-left"></div>
             <div class="eon-triangle"></div>
             <div class="eon-boundary b-right"></div>
-            <div class="eon-label">EON WjB</div>
+            <div class="eon-label">EON</div>
         </div>
         <div id="EON_WyB" class="eon-container" style="right: 190px;">
             <div class="eon-boundary b-left"></div>
             <div class="eon-triangle"></div>
             <div class="eon-boundary b-right"></div>
-            <div class="eon-label">EON WyB</div>
+            <div class="eon-label">EON</div>
         </div>
     </div>
 
@@ -261,7 +253,7 @@
     let counters = { dKo_A:0, dPo_A:0, Sz_A:0, dKo_B:0, dPo_B:0, Sz_B:0 };
     let history = [];
     let currentState = null;
-    let eonLockedStation = null; // Przechowuje informację, na której stacji zablokowano EON przyciskiem dKo
+    let eonLockedStation = null; 
 
     function msg(t) { 
         const logBox = document.getElementById('log');
@@ -311,11 +303,10 @@
     function updateEONVisibility() {
         document.querySelectorAll('.eon-container').forEach(e => {
             e.style.display = 'none';
-            // Nie czyścimy klasy locked-active automatycznie tutaj, dopóki pociąg jej nie skasuje
             if (!e.classList.contains('locked-active')) {
                 e.classList.remove('active');
             } else {
-                e.style.display = 'block'; // Wymuszamy widoczność stale świecącego EONu
+                e.style.display = 'block'; 
             }
         });
 
@@ -328,7 +319,6 @@
         }
     }
 
-    // Funkcja do podświetlenia EONu po dKo
     function lockEONActive(st) {
         eonLockedStation = st;
         const eonEl = document.getElementById(`EON_Wj${st}`);
@@ -420,7 +410,6 @@
             posPct += (dir === 'A' ? 0.8 : -0.8);
             t.style.left = posPct + '%';
             
-            // Animacja przejazdu przez EON Wyjazdowy
             if (dir === 'A' && posPct >= 14 && posPct <= 21) document.getElementById('EON_WyA').classList.add('active');
             else if (document.getElementById('EON_WyA')) document.getElementById('EON_WyA').classList.remove('active');
             
@@ -429,7 +418,6 @@
 
             if (((dir === 'A' && posPct > 18) || (dir === 'B' && posPct < 82))) { if(onPassedDepartureSig) { onPassedDepartureSig(); onPassedDepartureSig = null; } }
             
-            // Zatrzymanie pociągu przed semaforem wjazdowym
             if (dir === 'A' && posPct >= 64) { if(onReachedEntrySig) { clearInterval(moveInterval); onReachedEntrySig(); return; } }
             if (dir === 'B' && posPct <= 36) { if(onReachedEntrySig) { clearInterval(moveInterval); onReachedEntrySig(); return; } }
         }, 40);
@@ -443,10 +431,8 @@
             posPct += (dir === 'A' ? 0.8 : -0.8);
             t.style.left = posPct + '%';
             
-            // Animacja przejazdu przez EON Wjazdowy stacji końcowej
             if (dir === 'A') {
                 if (posPct >= 78 && posPct <= 85) {
-                    // Jeśli świeciło się z dKo, to przejechanie pociągu gasi blokadę trwałego podświetlenia
                     if (eonLockedStation === 'B') clearLockedEON('B');
                     document.getElementById('EON_WjB').classList.add('active');
                 } else {
@@ -590,7 +576,7 @@
             name: "STAN_WJAZD_NA_SZ_WARIANT_MIESZANY_Z_DKO",
             showGoBtn: true,
             setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_Blk`); },
-            handleGo: function() { const destStation = dir === 'A' ? 'B' : 'A'; msg("POCIĄG WJEŻDŻA PŁYNNIE (MIESZANY SZ + dKo)."); updatePulpitView(); resumeTrainMovement( () => { setSig(destStation, 'Wj', 'red'); }, () => { changeState(States.STAN_ALARM_ZWROT_DOZWOLONY_PO_DKO); } ); },
+            handleGo: function() { const destStation = dir === 'A' ? 'B' : 'A'; msg("POCIĄG WJEŻDŻA PŁYNNIE (MIESZANY SZ + dKo)."); updatePulpitView(); resumeTrainMovement( () => { setSig(destStation, 'Wj', 'red'); }, () => { changeState(States.STAN_ZWROT_DOZWOLONY_PO_DKO); } ); },
             on_Blk: function(st) { msg("POCIĄG JESZCZE NIE WJECHAŁ CAŁKOWICIE."); }
         },
         STAN_BLOKADA_UWIĘZIONA_WARIANT_MIESZANY: {
@@ -609,9 +595,9 @@
         },
         STAN_ZWROT_DOZWOLONY_PO_DKO: {
             name: "STAN_ZWROT_DOZWOLONY_PO_DKO",
-            init: function() { const destStation = dir === 'A' ? 'B' : 'A'; setKoPLamp(destStation, true); msg("POCIĄG WJECHAŁ. BLOKADA KOŃCOWA ODBLOKOWANA NA STACJI " + destStation); },
+            init: function() { const destStation = dir === 'A' ? 'B' : 'A'; setKoPLamp(destStation, true); msg("POCIĄG WJECHAŁ. BLOKADA KOŃCOWA ODBLOKOWANA NA STACJI " + destStation + ". MOŻNA ZWOLNIĆ BLOKADĘ (KOP)."); },
             setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_Blk`); },
-            on_Blk: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { hardReset(); msg("ZWROT BLOKADY KOŃCOWEJ ZAKOŃCZONY SUKCESEM. RESET SYSTEMU."); } }
+            on_Blk: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { hardReset(); msg("ZWROT BLOKADY KOŃCOWEJ PO DKO ZAKOŃCZONY SUKCESEM. RESET SYSTEMU."); } }
         },
         STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU: {
             name: "STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU",
