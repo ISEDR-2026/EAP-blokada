@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EAP Simulator v8.0 - Custom Nomenclature</title>
+    <title>EAP Simulator v8.1 - Station Names & Fixed Arrows</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Azeret+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -126,19 +126,28 @@
 
         .eap-display { display: flex; justify-content: space-around; align-items: center; margin: 15px 0; background: #777; padding: 12px; border: 3px inset #555; }
         .station-arrows { display: flex; gap: 10px; align-items: center; background: #444; padding: 10px 20px; border-radius: 5px; }
-        .arrow-shape { position: relative; width: 70px; height: 22px; background: #2a2a2a; display: flex; align-items: center; padding: 0 5px; gap: 3px; }
-        .arrow-right { clip-path: polygon(0% 20%, 70% 20%, 70% 0%, 100% 50%, 70% 100%, 70% 80%, 0% 80%); }
-        .arrow-left { clip-path: polygon(100% 20%, 30% 20%, 30% 0%, 0% 50%, 30% 100%, 30% 80%, 100% 80%); }
-        .dot { width: 8px; height: 8px; border-radius: 50%; background: #111; }
-        .dot.white { background: #fff; box-shadow: 0 0 8px #fff; }
-        .dot.red { background: #f00; box-shadow: 0 0 8px #f00; }
+        
+        /* Strzałki blokady i kółka */
+        .arrow-shape { position: relative; width: 85px; height: 22px; background: #2a2a2a; display: flex; align-items: center; padding: 0 5px; gap: 3px; }
+        .arrow-right { clip-path: polygon(0% 20%, 65% 20%, 65% 0%, 100% 50%, 65% 100%, 65% 80%, 0% 80%); justify-content: flex-start; }
+        .arrow-left { clip-path: polygon(100% 20%, 35% 20%, 35% 0%, 0% 50%, 35% 100%, 35% 80%, 100% 80%); justify-content: flex-end; }
+        
+        /* Poprawiony układ kółek: duże kółko na grocie, małe na ogonie */
+        .arrow-right .dot-big { order: 5; margin-left: auto; margin-right: 5px; width: 14px; height: 14px; }
+        .arrow-left .dot-big { order: 1; margin-right: auto; margin-left: 5px; width: 14px; height: 14px; }
+        
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: #111; transition: background 0.1s; }
+        .dot-big { border-radius: 50%; background: #111; transition: background 0.1s; }
+        
+        .dot.white, .dot-big.white { background: #fff; box-shadow: 0 0 8px #fff; }
+        .dot.red, .dot-big.red { background: #f00; box-shadow: 0 0 8px #f00; }
         .blink { animation: blinker 0.7s linear infinite; }
         @keyframes blinker { 50% { opacity: 0.1; } }
         
         .controls { display: flex; justify-content: space-between; gap: 15px; }
-        .panel { flex: 1; background: #b0b0b0; padding: 15px; border: 1px solid #777; border-radius: 5px; display: flex; flex-direction: column; gap: 15px; }
+        .panel { flex: 1; background: #b0b0b0; padding: 15px; border: 1px solid #777; border-radius: 5px; display: flex; flex-direction: column; gap: 15px; position: relative; min-height: 160px; }
         .row { display: flex; gap: 15px; align-items: flex-end; }
-        .btn-unit { display: flex; flex-direction: column; align-items: center; min-width: 50px; }
+        .btn-unit { display: flex; flex-direction: column; align-items: center; min-width: 50px; z-index: 2; }
         .label { font-size: 11px; font-weight: bold; margin-bottom: 3px; }
         .counter { font-family: 'Azeret Mono', monospace; font-size: 10px; background: #000; color: #f00; padding: 1px 4px; border: 1px solid #444; margin-bottom: 2px; }
         
@@ -156,6 +165,24 @@
         .lamp-dioda { width: 14px; height: 14px; border-radius: 50%; background: #333; border: 1px solid #000; margin-bottom: 4px; }
         .lamp-dioda.blue { background: #00bfff; box-shadow: 0 0 15px #00bfff; }
         
+        /* Kolejowe tablice z nazwami stacji */
+        .station-sign {
+            position: absolute;
+            background-color: #003399;
+            color: #ffffff;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 4px 15px;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            border-radius: 2px;
+            letter-spacing: 0.5px;
+            z-index: 1;
+        }
+        .sign-left { bottom: 10px; left: 15px; }
+        .sign-right { bottom: 10px; right: 15px; }
+
         #log { background: #000; color: #0f0; font-family: 'Azeret Mono', monospace; padding: 12px; margin-top: 15px; height: 140px; border-left: 5px solid #0f0; overflow-y: auto; font-size: 12px; scroll-behavior: smooth; }
         .log-line { margin-bottom: 4px; border-bottom: 1px solid #1a1a1a; padding-bottom: 2px; }
         .footer-controls { display: flex; justify-content: flex-end; margin-top: 15px; gap: 15px; }
@@ -207,12 +234,20 @@
 
     <div class="eap-display">
         <div class="station-arrows">
-            <div id="arr_A_right" class="arrow-shape arrow-right"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-            <div id="arr_A_left" class="arrow-shape arrow-left"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            <div id="arr_A_right" class="arrow-shape arrow-right">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot-big"></div>
+            </div>
+            <div id="arr_A_left" class="arrow-shape arrow-left">
+                <div class="dot-big"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
         </div>
         <div class="station-arrows">
-            <div id="arr_B_right" class="arrow-shape arrow-right"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-            <div id="arr_B_left" class="arrow-shape arrow-left"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            <div id="arr_B_right" class="arrow-shape arrow-right">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot-big"></div>
+            </div>
+            <div id="arr_B_left" class="arrow-shape arrow-left">
+                <div class="dot-big"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
         </div>
     </div>
 
@@ -230,6 +265,7 @@
                 <div class="btn-unit"><div id="K_A" class="lamp-dioda"></div><button id="B_A_Blk" class="btn-round" onclick="triggerBtn('Blk','A')"></button><span class="label">KoGw</span></div>
                 <div class="btn-unit" style="margin-left:40px"><button id="B_A_Wbl" class="btn-round" onclick="triggerBtn('Wbl','A')"></button><span class="label">Wbl</span></div>
             </div>
+            <div class="station-sign sign-left">Leśna</div>
         </div>
         <div class="panel">
             <div class="row">
@@ -244,6 +280,7 @@
                 <div class="btn-unit"><button id="B_B_Wbl" class="btn-round" onclick="triggerBtn('Wbl','B')"></button><span class="label">Wbl</span></div>
                 <div class="btn-unit" style="margin-left:40px"><div id="K_B" class="lamp-dioda"></div><button id="B_B_Blk" class="btn-round" onclick="triggerBtn('Blk','B')"></button><span class="label">KoAw</span></div>
             </div>
+            <div class="station-sign sign-right">Polna</div>
         </div>
     </div>
     <div id="log"></div>
@@ -291,7 +328,10 @@
 
     function setDots(id, c) { 
         const el = document.getElementById(id);
-        if(el) el.querySelectorAll('.dot').forEach(d => d.className = 'dot ' + c); 
+        if(el) {
+            el.querySelectorAll('.dot').forEach(d => d.className = 'dot ' + c); 
+            el.querySelectorAll('.dot-big').forEach(d => d.className = 'dot-big ' + c); 
+        }
     }
 
     function disableAllButtons() {
@@ -372,7 +412,7 @@
         const t = document.getElementById('train-core');
         t.style.left = prev.trainPos; t.style.display = prev.trainDisplay; t.innerHTML = prev.trainHTML;
         prev.signals.forEach(s => { const el = document.getElementById(s.id); if(el) el.className = s.className; });
-        prev.eonClasses.forEach(e => { const el = document.getElementById(e.id); if(el) el.className = e.className; });
+        prev.eonClasses.forEach(e => { const el = document.getElementById(e.id); if(el) el.className = s.className; });
         changeState(States[prev.stateName], false);
         updateEONVisibility();
         if (history.length === 0) document.getElementById('btn-undo').disabled = true;
