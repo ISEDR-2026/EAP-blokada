@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EAP Simulator v8.2 - Station Signs in Track Layout</title>
+    <title>EAP Simulator v8.2 - Responsive Station Signs</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Azeret+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -16,14 +16,35 @@
             --accent: #00bfff; 
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: #000; font-family: 'DM Sans', sans-serif; margin: 0; padding: 10px; display: grid; place-items: center; min-height: 100vh; }
+        
+        /* Centrowanie kontenera skalującego na ekranie */
+        body { 
+            background: var(--bg); 
+            color: #000; 
+            font-family: 'DM Sans', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; 
+            overflow-x: hidden;
+        }
+        
+        /* Kontener, który dopasowuje się do ekranu i skaluje zawartość */
+        .responsive-wrapper {
+            width: 1280px;
+            height: auto;
+            transform-origin: top center;
+            padding: 10px;
+        }
         
         .pulpit { 
             background: var(--pulpit); 
             padding: 15px; 
             border: 4px solid #333; 
             border-radius: 8px; 
-            width: 1280px; 
+            width: 100%; 
             height: auto;
             box-shadow: 0 0 50px rgba(0,0,0,0.9); 
             position: relative; 
@@ -162,7 +183,6 @@
         .lamp-dioda { width: 14px; height: 14px; border-radius: 50%; background: #333; border: 1px solid #000; margin-bottom: 4px; }
         .lamp-dioda.blue { background: #00bfff; box-shadow: 0 0 15px #00bfff; }
         
-        /* Kolejowe tablice przeniesione do makiety torowej */
         .station-sign {
             position: absolute;
             background-color: #003399;
@@ -190,106 +210,130 @@
     </style>
 </head>
 <body>
-<div class="pulpit">
-    <button id="btn-go" onclick="currentState.handleGo()">Ruszaj 🚂</button>
-    <div class="track-layout">
-        <div class="main-track"></div>
+<div class="responsive-wrapper" id="pulpit-wrapper">
+    <div class="pulpit">
+        <button id="btn-go" onclick="currentState.handleGo()">Ruszaj 🚂</button>
+        <div class="track-layout">
+            <div class="main-track"></div>
 
-        <div class="signal-box" style="top: 25px; left: 130px;"><span class="sig-label">F1</span><div class="signal"><div id="L_WyA_G" class="light"></div><div id="L_WyA_R" class="light red"></div><div id="L_WyA_W" class="light"></div></div></div>
-        <div class="signal-box" style="top: 25px; left: 310px;"><span class="sig-label">G1/2</span><div class="signal"><div id="L_WjA_G" class="light"></div><div id="L_WjA_R" class="light red"></div><div id="L_WjA_W" class="light"></div></div></div>
+            <div class="signal-box" style="top: 25px; left: 130px;"><span class="sig-label">F1</span><div class="signal"><div id="L_WyA_G" class="light"></div><div id="L_WyA_R" class="light red"></div><div id="L_WyA_W" class="light"></div></div></div>
+            <div class="signal-box" style="top: 25px; left: 310px;"><span class="sig-label">G1/2</span><div class="signal"><div id="L_WjA_G" class="light"></div><div id="L_WjA_R" class="light red"></div><div id="L_WjA_W" class="light"></div></div></div>
 
-        <div id="EON_WyA" class="eon-container" style="left: 190px;">
-            <div class="eon-boundary b-left"></div>
-            <div class="eon-triangle"></div>
-            <div class="eon-boundary b-right"></div>
-            <div class="eon-label">EON</div>
-        </div>
-        <div id="EON_WjA" class="eon-container" style="left: 235px;">
-            <div class="eon-boundary b-left"></div>
-            <div class="eon-triangle"></div>
-            <div class="eon-boundary b-right"></div>
-            <div class="eon-label">EON</div>
-        </div>
-
-        <div id="train-core" class="train-container"></div>
-
-        <div class="signal-box" style="top: 25px; right: 310px;"><span class="sig-label">A1/2</span><div class="signal"><div id="L_WjB_G" class="light"></div><div id="L_WjB_R" class="light red"></div><div id="L_WjB_W" class="light"></div></div></div>
-        <div class="signal-box" style="top: 25px; right: 130px;"><span class="sig-label">B1</span><div class="signal"><div id="L_WyB_G" class="light"></div><div id="L_WyB_R" class="light red"></div><div id="L_WyB_W" class="light"></div></div></div>
-
-        <div id="EON_WjB" class="eon-container" style="right: 235px;">
-            <div class="eon-boundary b-left"></div>
-            <div class="eon-triangle"></div>
-            <div class="eon-boundary b-right"></div>
-            <div class="eon-label">EON</div>
-        </div>
-        <div id="EON_WyB" class="eon-container" style="right: 190px;">
-            <div class="eon-boundary b-left"></div>
-            <div class="eon-triangle"></div>
-            <div class="eon-boundary b-right"></div>
-            <div class="eon-label">EON</div>
-        </div>
-
-        <div class="station-sign sign-left">Leśna</div>
-        <div class="station-sign sign-right">Polna</div>
-    </div>
-
-    <div class="eap-display">
-        <div class="station-arrows">
-            <div id="arr_A_right" class="arrow-shape arrow-right">
-                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot-big"></div>
+            <div id="EON_WyA" class="eon-container" style="left: 190px;">
+                <div class="eon-boundary b-left"></div>
+                <div class="eon-triangle"></div>
+                <div class="eon-boundary b-right"></div>
+                <div class="eon-label">EON</div>
             </div>
-            <div id="arr_A_left" class="arrow-shape arrow-left">
-                <div class="dot-big"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div id="EON_WjA" class="eon-container" style="left: 235px;">
+                <div class="eon-boundary b-left"></div>
+                <div class="eon-triangle"></div>
+                <div class="eon-boundary b-right"></div>
+                <div class="eon-label">EON</div>
             </div>
-        </div>
-        <div class="station-arrows">
-            <div id="arr_B_right" class="arrow-shape arrow-right">
-                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot-big"></div>
-            </div>
-            <div id="arr_B_left" class="arrow-shape arrow-left">
-                <div class="dot-big"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-            </div>
-        </div>
-    </div>
 
-    <div class="controls">
-        <div class="panel">
-            <div class="row">
-                <div class="btn-unit"><span class="label">dKo</span><div id="cnt_dKo_A" class="counter">000</div><button id="B_A_dKo" class="btn-round" onclick="triggerBtn('dKo','A')"></button></div>
-                <div class="btn-unit"><span class="label">dPo</span><div id="cnt_dPo_A" class="counter">000</div><button id="B_A_dPo" class="btn-round" onclick="triggerBtn('dPo','A')"></button></div>
-                <div class="btn-unit" style="margin-left:10px"><span class="label">Poz</span><button id="B_A_Poz" class="btn-round" onclick="triggerBtn('Poz','A')"></button></div>
-                <div class="btn-unit"><span class="label">F</span><button id="B_A_Wyj" class="btn-round btn-green" onclick="triggerBtn('Wyj','A')"></button></div>
-                <div class="btn-unit"><span class="label">G</span><button id="B_A_Wj" class="btn-round btn-green" onclick="triggerBtn('Wj','A')"></button></div>
-                <div class="btn-unit"><span class="label">Sz</span><div id="cnt_Sz_A" class="counter">000</div><button id="B_A_Sz" class="btn-round btn-white" onclick="triggerBtn('Sz','A')"></button></div>
+            <div id="train-core" class="train-container"></div>
+
+            <div class="signal-box" style="top: 25px; right: 310px;"><span class="sig-label">A1/2</span><div class="signal"><div id="L_WjB_G" class="light"></div><div id="L_WjB_R" class="light red"></div><div id="L_WjB_W" class="light"></div></div></div>
+            <div class="signal-box" style="top: 25px; right: 130px;"><span class="sig-label">B1</span><div class="signal"><div id="L_WyB_G" class="light"></div><div id="L_WyB_R" class="light red"></div><div id="L_WyB_W" class="light"></div></div></div>
+
+            <div id="EON_WjB" class="eon-container" style="right: 235px;">
+                <div class="eon-boundary b-left"></div>
+                <div class="eon-triangle"></div>
+                <div class="eon-boundary b-right"></div>
+                <div class="eon-label">EON</div>
             </div>
-            <div class="row">
-                <div class="btn-unit"><div id="K_A" class="lamp-dioda"></div><button id="B_A_Blk" class="btn-round" onclick="triggerBtn('Blk','A')"></button><span class="label">KoGw</span></div>
-                <div class="btn-unit" style="margin-left:40px"><button id="B_A_Wbl" class="btn-round" onclick="triggerBtn('Wbl','A')"></button><span class="label">Wbl</span></div>
+            <div id="EON_WyB" class="eon-container" style="right: 190px;">
+                <div class="eon-boundary b-left"></div>
+                <div class="eon-triangle"></div>
+                <div class="eon-boundary b-right"></div>
+                <div class="eon-label">EON</div>
+            </div>
+
+            <div class="station-sign sign-left">Leśna</div>
+            <div class="station-sign sign-right">Polna</div>
+        </div>
+
+        <div class="eap-display">
+            <div class="station-arrows">
+                <div id="arr_A_right" class="arrow-shape arrow-right">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot-big"></div>
+                </div>
+                <div id="arr_A_left" class="arrow-shape arrow-left">
+                    <div class="dot-big"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                </div>
+            </div>
+            <div class="station-arrows">
+                <div id="arr_B_right" class="arrow-shape arrow-right">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot-big"></div>
+                </div>
+                <div id="arr_B_left" class="arrow-shape arrow-left">
+                    <div class="dot-big"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                </div>
             </div>
         </div>
-        <div class="panel">
-            <div class="row">
-                <div class="btn-unit"><span class="label">Poz</span><button id="B_B_Poz" class="btn-round" onclick="triggerBtn('Poz','B')"></button></div>
-                <div class="btn-unit"><span class="label">dPo</span><div id="cnt_dPo_B" class="counter">000</div><button id="B_B_dPo" class="btn-round" onclick="triggerBtn('dPo','B')"></button></div>
-                <div class="btn-unit"><span class="label">dKo</span><div id="cnt_dKo_B" class="counter">000</div><button id="B_B_dKo" class="btn-round" onclick="triggerBtn('dKo','B')"></button></div>
-                <div class="btn-unit" style="margin-left:10px"><span class="label">A</span><button id="B_B_Wj" class="btn-round btn-green" onclick="triggerBtn('Wj','B')"></button></div>
-                <div class="btn-unit"><span class="label">B</span><button id="B_B_Wyj" class="btn-round btn-green" onclick="triggerBtn('Wyj','B')"></button></div>
-                <div class="btn-unit"><span class="label">Sz</span><div id="cnt_Sz_B" class="counter">000</div><button id="B_B_Sz" class="btn-round btn-white" onclick="triggerBtn('Sz','B')"></button></div>
+
+        <div class="controls">
+            <div class="panel">
+                <div class="row">
+                    <div class="btn-unit"><span class="label">dKo</span><div id="cnt_dKo_A" class="counter">000</div><button id="B_A_dKo" class="btn-round" onclick="triggerBtn('dKo','A')"></button></div>
+                    <div class="btn-unit"><span class="label">dPo</span><div id="cnt_dPo_A" class="counter">000</div><button id="B_A_dPo" class="btn-round" onclick="triggerBtn('dPo','A')"></button></div>
+                    <div class="btn-unit" style="margin-left:10px"><span class="label">Poz</span><button id="B_A_Poz" class="btn-round" onclick="triggerBtn('Poz','A')"></button></div>
+                    <div class="btn-unit"><span class="label">F</span><button id="B_A_Wyj" class="btn-round btn-green" onclick="triggerBtn('Wyj','A')"></button></div>
+                    <div class="btn-unit"><span class="label">G</span><button id="B_A_Wj" class="btn-round btn-green" onclick="triggerBtn('Wj','A')"></button></div>
+                    <div class="btn-unit"><span class="label">Sz</span><div id="cnt_Sz_A" class="counter">000</div><button id="B_A_Sz" class="btn-round btn-white" onclick="triggerBtn('Sz','A')"></button></div>
+                </div>
+                <div class="row">
+                    <div class="btn-unit"><div id="K_A" class="lamp-dioda"></div><button id="B_A_Blk" class="btn-round" onclick="triggerBtn('Blk','A')"></button><span class="label">KoGw</span></div>
+                    <div class="btn-unit" style="margin-left:40px"><button id="B_A_Wbl" class="btn-round" onclick="triggerBtn('Wbl','A')"></button><span class="label">Wbl</span></div>
+                </div>
             </div>
-            <div class="row">
-                <div class="btn-unit"><button id="B_B_Wbl" class="btn-round" onclick="triggerBtn('Wbl','B')"></button><span class="label">Wbl</span></div>
-                <div class="btn-unit" style="margin-left:40px"><div id="K_B" class="lamp-dioda"></div><button id="B_B_Blk" class="btn-round" onclick="triggerBtn('Blk','B')"></button><span class="label">KoAw</span></div>
+            <div class="panel">
+                <div class="row">
+                    <div class="btn-unit"><span class="label">Poz</span><button id="B_B_Poz" class="btn-round" onclick="triggerBtn('Poz','B')"></button></div>
+                    <div class="btn-unit"><span class="label">dPo</span><div id="cnt_dPo_B" class="counter">000</div><button id="B_B_dPo" class="btn-round" onclick="triggerBtn('dPo','B')"></button></div>
+                    <div class="btn-unit"><span class="label">dKo</span><div id="cnt_dKo_B" class="counter">000</div><button id="B_B_dKo" class="btn-round" onclick="triggerBtn('dKo','B')"></button></div>
+                    <div class="btn-unit" style="margin-left:10px"><span class="label">A</span><button id="B_B_Wj" class="btn-round btn-green" onclick="triggerBtn('Wj','B')"></button></div>
+                    <div class="btn-unit"><span class="label">B</span><button id="B_B_Wyj" class="btn-round btn-green" onclick="triggerBtn('Wyj','B')"></button></div>
+                    <div class="btn-unit"><span class="label">Sz</span><div id="cnt_Sz_B" class="counter">000</div><button id="B_B_Sz" class="btn-round btn-white" onclick="triggerBtn('Sz','B')"></button></div>
+                </div>
+                <div class="row">
+                    <div class="btn-unit"><button id="B_B_Wbl" class="btn-round" onclick="triggerBtn('Wbl','B')"></button><span class="label">Wbl</span></div>
+                    <div class="btn-unit" style="margin-left:40px"><div id="K_B" class="lamp-dioda"></div><button id="B_B_Blk" class="btn-round" onclick="triggerBtn('Blk','B')"></button><span class="label">KoAw</span></div>
+                </div>
             </div>
         </div>
-    </div>
-    <div id="log"></div>
-    <div class="footer-controls">
-        <button id="btn-undo" class="btn-footer btn-undo" onclick="undo()" disabled>Cofnij</button>
-        <button class="btn-footer btn-reset" onclick="hardReset()">Reset</button>
+        <div id="log"></div>
+        <div class="footer-controls">
+            <button id="btn-undo" class="btn-footer btn-undo" onclick="undo()" disabled>Cofnij</button>
+            <button class="btn-footer btn-reset" onclick="hardReset()">Reset</button>
+        </div>
     </div>
 </div>
 
 <script>
+    /* SKRYPT ODPOWIEDZIALNY ZA AUTOMATYCZNE SKALOWANIE PULPITU DO EKRANU */
+    function adjustScale() {
+        const wrapper = document.getElementById('pulpit-wrapper');
+        const windowWidth = window.innerWidth;
+        const baseWidth = 1280; // bazowa szerokość pulpitu
+        
+        if (windowWidth < baseWidth + 20) {
+            // Obliczanie skali z lekkim marginesem
+            const scale = (windowWidth - 20) / baseWidth;
+            wrapper.style.transform = `scale(${scale})`;
+            // Dostosowanie marginesu dolnego, aby strona nie zostawiała pustej przestrzeni po skalowaniu
+            wrapper.parentElement.style.height = `${wrapper.offsetHeight * scale + 20}px`;
+        } else {
+            wrapper.style.transform = 'none';
+            wrapper.parentElement.style.height = 'auto';
+        }
+    }
+
+    window.addEventListener('resize', adjustScale);
+    window.addEventListener('DOMContentLoaded', adjustScale);
+
+    /* LOGIKA SYMULATORA */
     let dir = null; 
     let moveInterval = null;
     let pwlActive = false;
@@ -306,6 +350,7 @@
         line.innerText = "> " + t.toUpperCase();
         logBox.appendChild(line);
         logBox.scrollTop = logBox.scrollHeight;
+        setTimeout(adjustScale, 50); // Aktualizacja skali przy zmianie zawartości logu
     }
 
     function increment(type, st) {
@@ -437,6 +482,7 @@
         if (currentState && typeof currentState.setupView === 'function') { currentState.setupView(); }
         const showGo = currentState && typeof currentState.handleGo === 'function' && currentState.showGoBtn;
         document.getElementById('btn-go').style.display = showGo ? 'block' : 'none';
+        setTimeout(adjustScale, 50);
     }
 
     function setupTrainGraphics() {
