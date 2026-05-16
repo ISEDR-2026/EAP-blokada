@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EAP Simulator v8.6 - Final Fixed Positioning</title>
+    <title>EAP Simulator - by Adrian</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Azeret+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -125,8 +125,8 @@
             height: 40px; 
             z-index: 5; 
             display: none; 
-            font-family: monospace; 
-            font-size: 32px; 
+            font-family: 'DM Sans', sans-serif; 
+            font-size: 28px; 
             line-height: 40px; 
             white-space: nowrap; 
             pointer-events: none; 
@@ -519,10 +519,10 @@
         const t = document.getElementById('train-core');
         t.style.display = 'block';
         if (dir === 'A') {
-            t.innerHTML = '辨辨<span style="display:inline-block; transform: scaleX(-1);">🚂</span>'; 
+            t.innerHTML = '🚃🚃<span style="display:inline-block; transform: scaleX(-1);">🚂</span>'; 
             t.style.left = getAbsoluteTargetLeft('sig-F1', 'A') + '%';
         } else {
-            t.innerHTML = '🚂辨辨'; 
+            t.innerHTML = '🚂🚃🚃'; 
             t.style.left = getAbsoluteTargetLeft('sig-B1', 'B') + '%';
         }
     }
@@ -531,8 +531,6 @@
         const t = document.getElementById('train-core');
         if (moveInterval) clearInterval(moveInterval);
         
-        // POPRAWKA: Pociąg jadący w prawo (A) jedzie do semafora wjazdowego Polnej (sig-A12).
-        // Pociąg jadący w lewo (B) jedzie do semafora wjazdowego Leśnej (sig-G12).
         const targetSig = (dir === 'A') ? 'sig-A12' : 'sig-G12';
         const stopPct = getAbsoluteTargetLeft(targetSig, dir);
 
@@ -593,7 +591,6 @@
         const t = document.getElementById('train-core');
         if (moveInterval) clearInterval(moveInterval);
 
-        // POPRAWKA: Orientacja semafora wjazdowego dopasowana do kierunku
         const targetSig = (dir === 'A') ? 'sig-A12' : 'sig-G12';
         const wjSigCenter = document.getElementById(targetSig).offsetLeft;
         const containerWidth = document.getElementById('track-layout-container').offsetWidth;
@@ -619,7 +616,6 @@
                     if(onPassedEntrySig) { onPassedEntrySig(); onPassedEntrySig = null; }
                 }
                 
-                // POPRAWKA: Próg schowania pociągu przesunięty w głąb stacji Polna (82%)
                 if (posPct > 82) {
                     clearInterval(moveInterval);
                     t.style.display = 'none';
