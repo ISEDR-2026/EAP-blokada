@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=1100">
-    <title>EAP Simulator  - Creator of Adrian </title>
+    <title>EAP Simulator v8.9 - PWL Update</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Azeret+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -209,6 +209,7 @@
         
         .lamp-dioda { width: 14px; height: 14px; border-radius: 50%; background: #333; border: 1px solid #000; margin-bottom: 4px; }
         .lamp-dioda.blue { background: #00bfff; box-shadow: 0 0 15px #00bfff; }
+        .lamp-dioda.white { background: #ffffff; box-shadow: 0 0 15px #ffffff; }
         
         .station-sign {
             position: absolute;
@@ -312,8 +313,9 @@
                 <div class="btn-unit"><span class="label">Sz</span><div id="cnt_Sz_A" class="counter">000</div><button id="B_A_Sz" class="btn-round" onclick="triggerBtn('Sz','A')"></button></div>
             </div>
             <div class="row">
-                <div class="btn-unit"><div id="K_A" class="lamp-dioda"></div><button id="B_A_Blk" class="btn-round" onclick="triggerBtn('Blk','A')"></button><span class="label">KoGw</span></div>
-                <div class="btn-unit" style="margin-left:40px"><button id="B_A_Wbl" class="btn-round" onclick="triggerBtn('Wbl','A')"></button><span class="label">Wbl</span></div>
+                <div class="btn-unit"><div id="K_A" class="lamp-dioda"></div><button id="B_A_Blk" class="btn-round" onclick="triggerBtn('Blk','A')"></button><span class="label">KoG</span></div>
+                <div class="btn-unit" style="margin-left:25px"><div id="PWL_A" class="lamp-dioda"></div><span class="label">PWL</span></div>
+                <div class="btn-unit" style="margin-left:25px"><button id="B_A_Wbl" class="btn-round" onclick="triggerBtn('Wbl','A')"></button><span class="label">Wbl</span></div>
             </div>
         </div>
         <div class="panel">
@@ -327,7 +329,8 @@
             </div>
             <div class="row">
                 <div class="btn-unit"><button id="B_B_Wbl" class="btn-round" onclick="triggerBtn('Wbl','B')"></button><span class="label">Wbl</span></div>
-                <div class="btn-unit" style="margin-left:40px"><div id="K_B" class="lamp-dioda"></div><button id="B_B_Blk" class="btn-round" onclick="triggerBtn('Blk','B')"></button><span class="label">KoAw</span></div>
+                <div class="btn-unit" style="margin-left:25px"><div id="PWL_B" class="lamp-dioda"></div><span class="label">PWL</span></div>
+                <div class="btn-unit" style="margin-left:25px"><div id="K_B" class="lamp-dioda"></div><button id="B_B_Blk" class="btn-round" onclick="triggerBtn('Blk','B')"></button><span class="label">KoA</span></div>
             </div>
         </div>
     </div>
@@ -487,6 +490,12 @@
         if (currentState && typeof currentState.setupView === 'function') { currentState.setupView(); }
         const showGo = currentState && typeof currentState.handleGo === 'function' && currentState.showGoBtn;
         document.getElementById('btn-go').style.display = showGo ? 'block' : 'none';
+
+        // Wizualizacja lampki PWL na stacji początkowej (wyprawiającej pociąg)
+        const pwlA = document.getElementById('PWL_A');
+        const pwlB = document.getElementById('PWL_B');
+        if (pwlA) pwlA.className = (pwlActive && dir === 'A') ? 'lamp-dioda white' : 'lamp-dioda';
+        if (pwlB) pwlB.className = (pwlActive && dir === 'B') ? 'lamp-dioda white' : 'lamp-dioda';
     }
 
     function getAbsoluteTargetLeft(semaphoreId, direction) {
