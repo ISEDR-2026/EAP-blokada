@@ -2,8 +2,8 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EAP Simulator - Creator of Adrian </title>
+    <meta name="viewport" content="width=1100">
+    <title>EAP Simulator v8.7 - Final Version</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Azeret+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -36,6 +36,7 @@
             border: 4px solid #333; 
             border-radius: 8px; 
             width: 100%; 
+            min-width: 1080px; /* Sztywne minimum, żeby elementy się nie łamały */
             max-width: 1280px; 
             height: auto;
             box-shadow: 0 0 50px rgba(0,0,0,0.9); 
@@ -340,36 +341,6 @@
 </div>
 
 <script>
-    // SKRYPT DOPASOWUJĄCY WYŚWIETLANIE (SKALOWANIE EKRANU)
-    function dopasujSkalowanie() {
-        const pulpit = document.querySelector('.pulpit');
-        const szerokoscEkranu = window.innerWidth;
-        const minimalnaSzerokoscAplikacji = 1000; // Szerokość, przy której aplikacja wygląda idealnie
-
-        if (szerokoscEkranu < minimalnaSzerokoscAplikacji) {
-            const skala = (szerokoscEkranu - 20) / minimalnaSzerokoscAplikacji; // -20px na drobne marginesy po bokach
-            pulpit.style.minWidth = minimalnaSzerokoscAplikacji + 'px';
-            pulpit.style.transform = `scale(${skala})`;
-            pulpit.style.transformOrigin = 'top center';
-            
-            // Obliczenie nowej wysokości po przeskalowaniu, aby zlikwidować pustą przestrzeń na dole
-            const oryginalnaWysokosc = pulpit.offsetHeight;
-            const nowaWysokosc = oryginalnaWysokosc * skala;
-            pulpit.style.marginBottom = `-${oryginalnaWysokosc - nowaWysokosc}px`;
-        } else {
-            // Reset dla większych ekranów (np. iPad w poziomie, PC)
-            pulpit.style.minWidth = 'auto';
-            pulpit.style.transform = 'none';
-            pulpit.style.marginBottom = '0';
-        }
-    }
-
-    // Wywołanie przy starcie i przy każdej zmianie rozmiaru ekranu (lub obróceniu telefonu)
-    window.addEventListener('load', dopasujSkalowanie);
-    window.addEventListener('resize', dopasujSkalowanie);
-
-
-    // PONIŻEJ ORYGINALNA LOGIKA APLIKACJI
     let dir = null; 
     let moveInterval = null;
     let pwlActive = false;
@@ -477,9 +448,6 @@
         });
         if (history.length > 30) history.shift();
         document.getElementById('btn-undo').disabled = false;
-        
-        // Ponowne dopasowanie po zmianach w DOM (zapobiega ewentualnym błędom rozmiaru po kliknięciu)
-        setTimeout(dopasujSkalowanie, 50);
     }
 
     function undo() {
@@ -834,4 +802,13 @@
             handleGo: function() { msg("POCIĄG WYJEŻDŻA NA SZLAKNA SYGNAŁ ZASTĘPCZY"); updatePulpitView(); startTrainMovement( () => { setSig(dir, 'Wy', 'red'); }, () => { changeState(States.STAN_OCZEKIWANIE_NA_WJAZD_PO_ZIELONYM()); }, null, null ); },
             on_Sz: function(st) { if(st === dir) { increment('Sz', st); setSig(dir, 'Wy', 'white-blink'); msg("WYJAZD NA SZ: PONOWNE PODANIE SYGNAŁU ZASTĘPCZEGO IN dPo."); } },
             on_Poz: function(st) { if (st === dir) { changeState(States.STAN_BLOKADA_WZBUDZONA); msg("POZ: DROGA ROZWIĄZANA AWARYJNIE."); } },
-            on_dPo: function(st) { if
+            on_dPo: function(st) { if(st === dir) { increment('dPo', st); pwlFlash = true; setTimeout(() => { pwlFlash = false; updatePulpitView(); }, 300); } }
+        }
+    };
+
+    window.onload = function() { 
+        hardReset(); 
+    };
+</script>
+</body>
+</html>
