@@ -174,6 +174,7 @@
         .blink { animation: blinker 0.7s linear infinite; }
         @keyframes blinker { 50% { opacity: 0.1; } }
         
+        /* NOWA SEKCRJA CONTROLS - REORGANIZACJA NA CSS GRID */
         .controls { 
             display: flex; 
             justify-content: space-between; 
@@ -185,17 +186,20 @@
             padding: 15px; 
             border: 1px solid #777; 
             border-radius: 5px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: auto auto;
+            gap: 20px 10px; 
             position: relative; 
             min-height: 120px; 
-            overflow-x: auto; 
         }
-        .row { display: flex; gap: 15px; align-items: flex-end; min-width: max-content; }
-        .btn-unit { display: flex; flex-direction: column; align-items: center; min-width: 50px; z-index: 2; }
-        .label { font-size: 11px; font-weight: bold; margin-bottom: 3px; }
+        
+        .btn-unit { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; z-index: 2; height: 100%; position: relative; }
+        .btn-unit.empty { visibility: hidden; pointer-events: none; }
+        .label { font-size: 11px; font-weight: bold; margin-bottom: 3px; text-align: center; }
+        .label-bottom { font-size: 11px; font-weight: bold; margin-top: 5px; text-align: center; }
         .counter { font-family: 'Azeret Mono', monospace; font-size: 10px; background: #000; color: #f00; padding: 1px 4px; border: 1px solid #444; margin-bottom: 2px; }
+        .counter-spacer { height: 16px; margin-bottom: 2px; }
         
         .btn-round { width: 40px; height: 40px; border-radius: 50%; background: #222; border: 3px solid #111; cursor: pointer; position: relative; }
         .btn-round:disabled { opacity: 0.2; }
@@ -210,6 +214,8 @@
         .lamp-dioda { width: 14px; height: 14px; border-radius: 50%; background: #333; border: 1px solid #000; margin-bottom: 4px; }
         .lamp-dioda.blue { background: #00bfff; box-shadow: 0 0 15px #00bfff; }
         .lamp-dioda.white { background: #ffffff; box-shadow: 0 0 15px #ffffff; }
+
+        .semafor-letter { font-size: 14px; font-weight: bold; color: #025011; margin-bottom: 3px; cursor: help; }
         
         .station-sign {
             position: absolute;
@@ -303,35 +309,36 @@
     </div>
 
     <div class="controls">
-        <div class="panel">
-            <div class="row">
-                <div class="btn-unit"><span class="label">dKo</span><div id="cnt_dKo_A" class="counter">000</div><button id="B_A_dKo" class="btn-round" onclick="triggerBtn('dKo','A')"></button></div>
-                <div class="btn-unit"><span class="label">dPo</span><div id="cnt_dPo_A" class="counter">000</div><button id="B_A_dPo" class="btn-round" onclick="triggerBtn('dPo','A')"></button></div>
-                <div class="btn-unit" style="margin-left:10px"><span class="label">Poz</span><button id="B_A_Poz" class="btn-round" onclick="triggerBtn('Poz','A')"></button></div>
-                <div class="btn-unit"><span class="label">F</span><button id="B_A_Wyj" class="btn-round btn-green" onclick="triggerBtn('Wyj','A')"></button></div>
-                <div class="btn-unit"><span class="label">G</span><button id="B_A_Wj" class="btn-round btn-green" onclick="triggerBtn('Wj','A')"></button></div>
-                <div class="btn-unit"><span class="label">Sz</span><div id="cnt_Sz_A" class="counter">000</div><button id="B_A_Sz" class="btn-round" onclick="triggerBtn('Sz','A')"></button></div>
-            </div>
-            <div class="row">
-                <div class="btn-unit"><div id="K_A" class="lamp-dioda"></div><button id="B_A_Blk" class="btn-round" onclick="triggerBtn('Blk','A')"></button><span class="label">KoG</span></div>
-                <div class="btn-unit" style="margin-left:25px"><div id="PWL_A" class="lamp-dioda"></div><span class="label">PWL</span></div>
-                <div class="btn-unit" style="margin-left:25px"><button id="B_A_Wbl" class="btn-round" onclick="triggerBtn('Wbl','A')"></button><span class="label">Wbl</span></div>
-            </div>
+        <div class="panel" id="panel-lesna">
+            <div class="btn-unit"><span class="label">dKo</span><div id="cnt_dKo_A" class="counter">000</div><button id="B_A_dKo" class="btn-round" onclick="triggerBtn('dKo','A')"></button></div>
+            <div class="btn-unit"><span class="label">dPo</span><div id="cnt_dPo_A" class="counter">000</div><button id="B_A_dPo" class="btn-round" onclick="triggerBtn('dPo','A')"></button></div>
+            <div class="btn-unit"><span class="label">Poz</span><div class="counter-spacer"></div><button id="B_A_Poz" class="btn-round" onclick="triggerBtn('Poz','A')"></button></div>
+            <div class="btn-unit"><span class="semafor-letter" id="sem-F" title="Semafor F">F</span><button id="B_A_Wyj" class="btn-round btn-green" onclick="triggerBtn('Wyj','A')"></button></div>
+            <div class="btn-unit"><span class="semafor-letter" id="sem-G" title="Semafor G">G</span><button id="B_A_Wj" class="btn-round btn-green" onclick="triggerBtn('Wj','A')"></button></div>
+            <div class="btn-unit"><span class="label">Sz</span><div id="cnt_Sz_A" class="counter">000</div><button id="B_A_Sz" class="btn-round" onclick="triggerBtn('Sz','A')"></button></div>
+            
+            <div class="btn-unit"><div id="K_A" class="lamp-dioda"></div><button id="B_A_Blk" class="btn-round" onclick="triggerBtn('Blk','A')"></button><span class="label-bottom">KoG</span></div>
+            <div class="btn-unit empty"></div>
+            <div class="btn-unit"><button id="B_A_Wbl" class="btn-round" onclick="triggerBtn('Wbl','A')"></button><span class="label-bottom">Wbl</span></div>
+            <div class="btn-unit empty"></div>
+            <div class="btn-unit empty"></div>
+            <div class="btn-unit"><div id="PWL_A" class="lamp-dioda"></div><span class="label-bottom">PWL</span></div>
         </div>
-        <div class="panel">
-            <div class="row">
-                <div class="btn-unit"><span class="label">Poz</span><button id="B_B_Poz" class="btn-round" onclick="triggerBtn('Poz','B')"></button></div>
-                <div class="btn-unit"><span class="label">dPo</span><div id="cnt_dPo_B" class="counter">000</div><button id="B_B_dPo" class="btn-round" onclick="triggerBtn('dPo','B')"></button></div>
-                <div class="btn-unit"><span class="label">dKo</span><div id="cnt_dKo_B" class="counter">000</div><button id="B_B_dKo" class="btn-round" onclick="triggerBtn('dKo','B')"></button></div>
-                <div class="btn-unit" style="margin-left:10px"><span class="label">A</span><button id="B_B_Wj" class="btn-round btn-green" onclick="triggerBtn('Wj','B')"></button></div>
-                <div class="btn-unit"><span class="label">B</span><button id="B_B_Wyj" class="btn-round btn-green" onclick="triggerBtn('Wyj','B')"></button></div>
-                <div class="btn-unit"><span class="label">Sz</span><div id="cnt_Sz_B" class="counter">000</div><button id="B_B_Sz" class="btn-round" onclick="triggerBtn('Sz','B')"></button></div>
-            </div>
-            <div class="row">
-                <div class="btn-unit"><button id="B_B_Wbl" class="btn-round" onclick="triggerBtn('Wbl','B')"></button><span class="label">Wbl</span></div>
-                <div class="btn-unit" style="margin-left:25px"><div id="PWL_B" class="lamp-dioda"></div><span class="label">PWL</span></div>
-                <div class="btn-unit" style="margin-left:25px"><div id="K_B" class="lamp-dioda"></div><button id="B_B_Blk" class="btn-round" onclick="triggerBtn('Blk','B')"></button><span class="label">KoA</span></div>
-            </div>
+
+        <div class="panel" id="panel-polna">
+            <div class="btn-unit"><span class="label">dKo</span><div id="cnt_dKo_B" class="counter">000</div><button id="B_B_dKo" class="btn-round" onclick="triggerBtn('dKo','B')"></button></div>
+            <div class="btn-unit"><span class="label">dPo</span><div id="cnt_dPo_B" class="counter">000</div><button id="B_B_dPo" class="btn-round" onclick="triggerBtn('dPo','B')"></button></div>
+            <div class="btn-unit"><span class="label">Poz</span><div class="counter-spacer"></div><button id="B_B_Poz" class="btn-round" onclick="triggerBtn('Poz','B')"></button></div>
+            <div class="btn-unit"><span class="semafor-letter" id="sem-A" title="Semafor A">A</span><button id="B_B_Wj" class="btn-round btn-green" onclick="triggerBtn('Wj','B')"></button></div>
+            <div class="btn-unit"><span class="semafor-letter" id="sem-B" title="Semafor B">B</span><button id="B_B_Wyj" class="btn-round btn-green" onclick="triggerBtn('Wyj','B')"></button></div>
+            <div class="btn-unit"><span class="label">Sz</span><div id="cnt_Sz_B" class="counter">000</div><button id="B_B_Sz" class="btn-round" onclick="triggerBtn('Sz','B')"></button></div>
+            
+            <div class="btn-unit"><div id="K_B" class="lamp-dioda"></div><button id="B_B_Blk" class="btn-round" onclick="triggerBtn('Blk','B')"></button><span class="label-bottom">KoA</span></div>
+            <div class="btn-unit empty"></div>
+            <div class="btn-unit"><button id="B_B_Wbl" class="btn-round" onclick="triggerBtn('Wbl','B')"></button><span class="label-bottom">Wbl</span></div>
+            <div class="btn-unit empty"></div>
+            <div class="btn-unit empty"></div>
+            <div class="btn-unit"><div id="PWL_B" class="lamp-dioda"></div><span class="label-bottom">PWL</span></div>
         </div>
     </div>
     
@@ -491,11 +498,26 @@
         const showGo = currentState && typeof currentState.handleGo === 'function' && currentState.showGoBtn;
         document.getElementById('btn-go').style.display = showGo ? 'block' : 'none';
 
-        // Wizualizacja lampki PWL na stacji początkowej (wyprawiającej pociąg)
+        // Wizualizacja lampek PWL na pulpitach
         const pwlA = document.getElementById('PWL_A');
         const pwlB = document.getElementById('PWL_B');
         if (pwlA) pwlA.className = (pwlActive && dir === 'A') ? 'lamp-dioda white' : 'lamp-dioda';
         if (pwlB) pwlB.className = (pwlActive && dir === 'B') ? 'lamp-dioda white' : 'lamp-dioda';
+
+        // Dynamiczne modyfikowanie dymków informacyjnych (atrybut title) na literach semaforów
+        const infoPWL = pwlActive ? " (Przeciwwtórność liniowa załączona)" : "";
+        if (dir === 'A') {
+            document.getElementById('sem-F').setAttribute('title', `Semafor F${infoPWL}`);
+            document.getElementById('sem-G').setAttribute('title', `Semafor G${infoPWL}`);
+        } else if (dir === 'B') {
+            document.getElementById('sem-A').setAttribute('title', `Semafor A${infoPWL}`);
+            document.getElementById('sem-B').setAttribute('title', `Semafor B${infoPWL}`);
+        } else {
+            document.getElementById('sem-F').setAttribute('title', "Semafor F");
+            document.getElementById('sem-G').setAttribute('title', "Semafor G");
+            document.getElementById('sem-A').setAttribute('title', "Semafor A");
+            document.getElementById('sem-B').setAttribute('title', "Semafor B");
+        }
     }
 
     function getAbsoluteTargetLeft(semaphoreId, direction) {
@@ -656,7 +678,7 @@
         if(moveInterval) clearInterval(moveInterval);
         dir = null; pwlActive = false; pwlFlash = false; eonLockedStation = null;
         document.querySelectorAll('.light').forEach(l => l.className = 'light');
-        document.querySelectorAll('.light[id*=\"_R\"]').forEach(l => l.className = 'light red');
+        document.querySelectorAll('.light[id*="_R"]').forEach(l => l.className = 'light red');
         document.getElementById('train-core').style.display = 'none';
         document.querySelectorAll('.eon-container').forEach(e => { e.classList.remove('active'); e.classList.remove('locked-active'); });
         setKoPLamp('A', false); setKoPLamp('B', false);
@@ -689,135 +711,122 @@
         },
         STAN_BLOKADA_WZBUDZONA: {
             name: "STAN_BLOKADA_WZBUDZONA",
+            init: function() { pwlActive = true; },
             setupView: function() {
                 const side = dir === 'A' ? 'right' : 'left';
                 setDots(`arr_A_${side}`, 'white'); setDots(`arr_B_${side}`, 'white');
-                enableBtn(`B_${dir}_Wyj`); enableBtn(`B_${dir}_Wbl`); enableBtn(`B_${dir}_dPo`);
+                enableBtn(`B_${dir}_Wyj`);
             },
-            on_Wbl: function(st) { if (st === dir) { changeState(States.STAN_ODWOLANIE_POZWOLENIA); msg("WBL: ŻĄDANIE ODWOŁANIA POZWOLENIA."); } },
-            on_Wyj: function(st) { if (st === dir) { pwlActive = true; setSig(dir, 'Wy', 'green'); setupTrainGraphics(); changeState(States.STAN_WYJAZD_NA_ZIELONE); msg("WYJAZD: PODANO SYGNAŁ ZEZWALAJĄCY."); } },
-            on_dPo: function(st) { if(st === dir) { increment('dPo', st); changeState(States.STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU); } },
+            on_Wyj: function(st) {
+                if (st === dir) {
+                    setSig(dir, 'Wy', 'green');
+                    msg("PODANO SYGNAŁ ZEZWALAJĄCY NA SEMAFORZE WYJAZDOWYM");
+                    changeState(States.STAN_POCIAG_W_DRODZE);
+                    setupTrainGraphics();
+                }
+            },
             on_Sz: function(st) { increment('Sz', st); if (st === dir) changeState(States.STAN_WYJAZD_NA_SZ); }
-        },
-        STAN_ODWOLANIE_POZWOLENIA: {
-            name: "STAN_ODWOLANIE_POZWOLENIA",
-            setupView: function() {
-                const side = dir === 'A' ? 'right' : 'left'; const destStation = dir === 'A' ? 'B' : 'A';
-                setDots(`arr_${dir}_${side}`, 'white'); setDots(`arr_${destStation}_${side}`, 'white blink'); enableBtn(`B_${destStation}_Wbl`); 
-            },
-            on_Wbl: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { hardReset(); msg("WBL KOŃCOWE: BLOKADA COFNIĘTA DO STANU ZASADNICZEGO."); } }
-        },
-        STAN_WYJAZD_NA_ZIELONE: {
-            name: "STAN_WYJAZD_NA_ZIELONE",
-            showGoBtn: true,
-            setupView: function() { const side = dir === 'A' ? 'right' : 'left'; const destStation = dir === 'A' ? 'B' : 'A'; setDots(`arr_${dir}_${side}`, 'red'); setDots(`arr_${destStation}_${side}`, 'red blink'); enableBtn(`B_${dir}_dPo`); },
-            handleGo: function() { msg("POCIĄG WYJECHAŁ NA SZLAK"); const side = dir === 'A' ? 'right' : 'left'; const destStation = dir === 'A' ? 'B' : 'A'; updatePulpitView(); startTrainMovement( () => { setSig(dir, 'Wy', 'red'); setDots(`arr_${dir}_${side}`, 'red'); setDots(`arr_${destStation}_${side}`, 'red'); }, () => { changeState(States.STAN_OCZEKIWANIE_NA_WJAZD_PO_ZIELONYM()); }, null, null ); },
-            on_dPo: function(st) { if (st === dir) { increment('dPo', st); changeState(States.STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU); } }
-        },
-        STAN_OCZEKIWANIE_NA_WJAZD_PO_ZIELONYM: function() {
-            return {
-                name: "STAN_OCZEKIWANIE_NA_WJAZD_PO_ZIELONYM",
-                init: function() { const side = dir === 'A' ? 'right' : 'left'; setDots(`arr_A_${side}`, 'red'); setDots(`arr_B_${side}`, 'red'); msg("POCIĄG ZATRZYMAŁ SIĘ PRZED SEMAFOREM WJAZDOWYM STACJI KOŃCOWEJ."); },
-                setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_Wj`); enableBtn(`B_${destStation}_dKo`); },
-                on_Wj: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { setSig(destStation, 'Wj', 'green'); changeState(States.STAN_WJAZD_NA_ZIELONE_RUCH); msg("PODANO SYGNAŁ ZEZWALAJĄCY NA WJAZD"); } },
-                on_Sz: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { increment('Sz', st); setSig(destStation, 'Wj', 'white-blink'); changeState(States.STAN_WJAZD_NA_SZ_WARIANT_MIESZANY); msg("WJAZD: PODANO SYGNAŁ ZASTĘPCZY."); } },
-                on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if(st === destStation) { increment('dKo', st); lockEONActive(st); msg("UŻYTO PRZYCISKU DKO PRZED WJAZDEM. EON WJAZDOWY PODŚWIETLONY."); } }
-            };
-        },
-        STAN_WJAZD_NA_ZIELONE_RUCH: {
-            name: "STAN_WJAZD_NA_ZIELONE_RUCH",
-            showGoBtn: true,
-            setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_dKo`); },
-            handleGo: function() { const destStation = dir === 'A' ? 'B' : 'A'; msg("POCIĄG WJEŻDŻA PŁYNNIE W STACJĘ KOŃCOWĄ. ODBLOKOWAŁA SIĘ ZASTAWKA NAD BLOKIEM KOŃCOWYM"); updatePulpitView(); resumeTrainMovement( () => { setSig(destStation, 'Wj', 'red'); }, () => { changeState(States.STAN_KONCOWY_AUTOMAT_KOP); } ); },
-            on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if(st === destStation) { increment('dKo', st); lockEONActive(st); msg("UŻYTO PRZYCISKU DKO W TRAKCIE RUCHU. EON WJAZDOWY PODŚWIETLONY."); } }
-        },
-        STAN_KONCOWY_AUTOMAT_KOP: {
-            name: "STAN_KONCOWY_AUTOMAT_KOP",
-            init: function() { const destStation = dir === 'A' ? 'B' : 'A'; setKoPLamp(destStation, true); msg("POCIĄG PRZYJECHAŁ. BLOKADA KOŃCOWA ODBLOKOWANA NA STACJI " + destStation); },
-            setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_Blk`); },
-            on_Blk: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { hardReset(); msg("ZWROT BLOKADY KOŃCOWEJ ZAKOŃCZONY SUKCESEM. RESET SYSTEMU."); } }
         },
         STAN_WYJAZD_NA_SZ: {
             name: "STAN_WYJAZD_NA_SZ",
+            init: function() { pwlActive = false; setSig(dir, 'Wy', 'white-blink'); msg("PODANO SYGNAŁ ZASTĘPCZY SZ"); setupTrainGraphics(); },
+            setupView: function() { },
             showGoBtn: true,
-            init: function() { setupTrainGraphics(); setSig(dir, 'Wy', 'white-blink'); msg("WYJAZD NA SZ: PODANO SYGNAŁ ZASTĘPCZY."); },
-            setupView: function() { const side = dir === 'A' ? 'right' : 'left'; setDots(`arr_A_${side}`, 'white'); setDots(`arr_B_${side}`, 'white'); enableBtn(`B_${dir}_dPo`); enableBtn(`B_${dir}_Sz`); },
-            handleGo: function() { msg("POCIĄG WYJECHAŁ NA SZLAK"); updatePulpitView(); startTrainMovement( () => { setSig(dir, 'Wy', 'red'); }, () => { changeState(States.STAN_OCZEKIWANIE_NA_WJAZD_PO_SZ()); }, null, null ); },
-            on_Sz: function(st) { if(st === dir) { increment('Sz', st); setSig(dir, 'Wy', 'white-blink'); msg("WYJAZD NA SZ: PONOWNE PODANIE SYGNAŁU ZASTĘPCZEGO."); } },
-            on_dPo: function(st) { if (st === dir) { increment('dPo', st); changeState(States.STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU); } }
+            handleGo: function() {
+                msg("POCIĄG RUSZYŁ NA SYGNAŁ ZASTĘPCZY SZ");
+                setSig(dir, 'Wy', 'red');
+                changeState(States.STAN_POCIAG_W_DRODZE);
+            }
         },
-        STAN_OCZEKIWANIE_NA_WJAZD_PO_SZ: function() {
-            return {
-                name: "STAN_OCZEKIWANIE_NA_WJAZD_PO_SZ",
-                init: function() { const side = dir === 'A' ? 'right' : 'left'; setDots(`arr_A_${side}`, 'white'); setDots(`arr_B_${side}`, 'white'); msg("POCIĄG ZATRZYMAŁ SIĘ POD SEMAFOREM WJAZDOWYM"); },
-                setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_Wj`); enableBtn(`B_${destStation}_dKo`); },
-                on_Wj: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { setSig(destStation, 'Wj', 'green'); changeState(States.STAN_WJAZD_NA_ZIELONE_PO_SZ_WYJEZDZIE); msg("PODANO SYGNAŁ ZEZWALAJĄCY NA WJAZD"); } },
-                on_Sz: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { increment('Sz', st); setSig(destStation, 'Wj', 'white-blink'); changeState(States.STAN_WJAZD_NA_SZ_CZYST_Z_DKO); msg("WJAZD: PODANO SYGNAŁ ZASTĘPCZY."); } },
-                on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if(st === destStation) { increment('dKo', st); lockEONActive(st); msg("UŻYTO PRZYCISKU DKO. EON WJAZDOWY PODŚWIETLONY STALE."); } }
-            };
-        },
-        STAN_WJAZD_NA_ZIELONE_PO_SZ_WYJEZDZIE: {
-            name: "STAN_WJAZD_NA_ZIELONE_PO_SZ_WYJEZDZIE",
-            showGoBtn: true,
-            setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_dKo`); },
-            handleGo: function() { const destStation = dir === 'A' ? 'B' : 'A'; msg("POCIĄG WJEŻDŻA PŁYNNIE W STACJĘ KOŃCOWĄ. Blokada zablokowana"); updatePulpitView(); resumeTrainMovement( null, () => { setSig(destStation, 'Wj', 'red'); }, () => { changeState(States.STAN_BLOKADA_UWIĘZIONA_WARIANT_MIESZANY); } ); },
-            on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if(st === destStation) { increment('dKo', st); lockEONActive(st); } }
-        },
-        STAN_WJAZD_NA_SZ_WARIANT_MIESZANY: {
-            name: "STAN_WJAZD_NA_SZ_WARIANT_MIESZANY",
-            showGoBtn: true,
-            setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_dKo`); },
-            handleGo: function() { const destStation = dir === 'A' ? 'B' : 'A'; msg("POCIĄG WJEŻDŻA PŁYNNIE NA SYGNAŁ ZASTĘPCZY."); updatePulpitView(); resumeTrainMovement( () => { setSig(destStation, 'Wj', 'red'); }, () => { changeState(States.STAN_BLOKADA_UWIĘZIONA_WARIANT_MIESZANY); } ); },
-            on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { increment('dKo', st); setKoPLamp(destStation, true); lockEONActive(st); changeState(States.STAN_WJAZD_NA_SZ_WARIANT_MIESZANY_Z_DKO); msg("UŻYTO PRZYCISKU DKO WŁĄCZONO CZUJNIK ZA SEMAFOREM WJAZDOWYM"); } }
-        },
-        STAN_WJAZD_NA_SZ_WARIANT_MIESZANY_Z_DKO: {
-            name: "STAN_WJAZD_NA_SZ_WARIANT_MIESZANY_Z_DKO",
-            showGoBtn: true,
-            setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_Blk`); },
-            handleGo: function() { const destStation = dir === 'A' ? 'B' : 'A'; msg("POCIĄG WJEŻDŻA PŁYNNIE (MIESZANY SZ + dKo)."); updatePulpitView(); resumeTrainMovement( () => { setSig(destStation, 'Wj', 'red'); }, () => { changeState(States.STAN_ZWROT_DOZWOLONY_PO_DKO); } ); },
-            on_Blk: function(st) { msg("POCIĄG JESZCZE NIE WJECHAŁ CAŁKOWICIE."); }
-        },
-        STAN_BLOKADA_UWIĘZIONA_WARIANT_MIESZANY: {
-            name: "STAN_BLOKADA_UWIĘZIONA_WARIANT_MIESZANY",
-            init: function() { const destStation = dir === 'A' ? 'B' : 'A'; setKoPLamp(destStation, false); msg("BLOKADA JEST ZABLOKOWANA"); msg("BLOKADA UWIĘZIONA NA STACJI " + destStation + "! WJAZD NA Sz BEZ dKo."); },
-            setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_dKo`); },
-            on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { increment('dKo', st); lockEONActive(st); changeState(States.STAN_ZWROT_DOZWOLONY_PO_DKO); } }
-        },
-        STAN_WJAZD_NA_SZ_CZYST_Z_DKO: {
-            name: "STAN_WJAZD_NA_SZ_CZYST_Z_DKO",
-            showGoBtn: true,
-            init: function() { const destStation = dir === 'A' ? 'B' : 'A'; lockEONActive(destStation); },
-            setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_Blk`); },
-            handleGo: function() { const destStation = dir === 'A' ? 'B' : 'A'; msg("POCIĄG WJEŻDŻA PŁYNNIE (Sz + dKo)."); updatePulpitView(); resumeTrainMovement( () => { setSig(destStation, 'Wj', 'red'); }, () => { changeState(States.STAN_ZWROT_DOZWOLONY_PO_DKO); } ); },
-            on_Blk: function(st) { msg("POCIĄG JESZCZE NIE WJECHAŁ CAŁKOWICIE."); }
-        },
-        STAN_ZWROT_DOZWOLONY_PO_DKO: {
-            name: "STAN_ZWROT_DOZWOLONY_PO_DKO",
-            init: function() { const destStation = dir === 'A' ? 'B' : 'A'; setKoPLamp(destStation, true); msg("POCIĄG WJECHAŁ. BLOKADA KOŃCOWA ODBLOKOWANA NA STACJI " + destStation + ". MOŻNA ZWOLNIĆ BLOKADĘ."); },
-            setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_Blk`); },
-            on_Blk: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { hardReset(); msg("ZWROT BLOKADY KOŃCOWEJ PO DKO ZAKOŃCZONY SUKCESEM. RESET SYSTEMU."); } }
-        },
-        STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU: {
-            name: "STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU",
-            showGoBtn: true,
+        STAN_POCIAG_W_DRODZE: {
+            name: "STAN_POCIAG_W_DRODZE",
             init: function() {
-                pwlFlash = true; setTimeout(() => { pwlFlash = false; updatePulpitView(); }, 300); const side = dir === 'A' ? 'right' : 'left';
-                setDots('arr_A_right', ''); setDots('arr_A_left', ''); setDots('arr_B_right', ''); setDots('arr_B_left', ''); setDots(`arr_A_${side}`, 'red'); setDots(`arr_B_${side}`, 'red');
-                const currentWySig = document.getElementById(`L_Wy${dir}_W`);
-                if (currentWySig && currentWySig.classList.contains('white')) { setSig(dir, 'Wy', 'white-blink'); const oppStation = dir === 'A' ? 'B' : 'A'; setSig(oppStation, 'Wy', 'red'); } else { setSig('A', 'Wy', 'red'); setSig('B', 'Wy', 'red'); }
-                msg("UŻYTO PRZYCISKU DPO");
+                const destStation = dir === 'A' ? 'B' : 'A';
+                startTrainMovement(
+                    () => { setSig(dir, 'Wy', 'red'); msg("POCIĄG MINĄŁ SEMAFOR WYJAZDOWY - SYGNAŁ WRÓCIŁ DO STANU STÓJ"); },
+                    () => { msg("POCIĄG ZBLIŻA SIĘ DO SEMAFORA WJAZDOWEGO STACJI DOCELOWEJ"); changeState(States.STAN_PRZED_WJAZDEM); },
+                    null, null
+                );
             },
-            setupView: function() { enableBtn(`B_${dir}_dPo`); enableBtn(`B_${dir}_Poz`); enableBtn(`B_${dir}_Sz`); },
-            handleGo: function() { msg("POCIĄG WYJEŻDŻA NA SZLAKNA SYGNAŁ ZASTĘPCZY"); updatePulpitView(); startTrainMovement( () => { setSig(dir, 'Wy', 'red'); }, () => { changeState(States.STAN_OCZEKIWANIE_NA_WJAZD_PO_ZIELONYM()); }, null, null ); },
-            on_Sz: function(st) { if(st === dir) { increment('Sz', st); setSig(dir, 'Wy', 'white-blink'); msg("WYJAZD NA SZ: PONOWNE PODANIE SYGNAŁU ZASTĘPCZEGO IN dPo."); } },
-            on_Poz: function(st) { if (st === dir) { changeState(States.STAN_BLOKADA_WZBUDZONA); msg("POZ: DROGA ROZWIĄZANA AWARYJNIE."); } },
-            on_dPo: function(st) { if(st === dir) { increment('dPo', st); pwlFlash = true; setTimeout(() => { pwlFlash = false; updatePulpitView(); }, 300); } }
+            setupView: function() { const side = dir === 'A' ? 'right' : 'left'; setDots(`arr_A_${side}`, 'red'); setDots(`arr_B_${side}`, 'red'); }
+        },
+        STAN_PRZED_WJAZDEM: {
+            name: "STAN_PRZED_WJAZDEM",
+            init: function() { lockEONActive(dir === 'A' ? 'B' : 'A'); },
+            setupView: function() {
+                const side = dir === 'A' ? 'right' : 'left'; const destStation = dir === 'A' ? 'B' : 'A';
+                setDots(`arr_A_${side}`, 'red'); setDots(`arr_B_${side}`, 'red');
+                enableBtn(`B_${destStation}_Wj`);
+            },
+            on_Wj: function(st) {
+                const destStation = dir === 'A' ? 'B' : 'A';
+                if (st === destStation) {
+                    setSig(destStation, 'Wj', 'green');
+                    msg("PODANO SYGNAŁ ZEZWALAJĄCY NA SEMAFORZE WJAZDOWYM");
+                    changeState(States.STAN_WJAZD_W_TRAKCIE);
+                }
+            },
+            on_Sz: function(st) {
+                const destStation = dir === 'A' ? 'B' : 'A';
+                if (st === destStation) {
+                    increment('Sz', st);
+                    setSig(destStation, 'Wj', 'white-blink');
+                    msg("PODANO SYGNAŁ ZASTĘPCZY WJAZDOWY SZ");
+                    changeState(States.STAN_WJAZD_W_TRAKCIE);
+                }
+            }
+        },
+        STAN_WJAZD_W_TRAKCIE: {
+            name: "STAN_WJAZD_W_TRAKCIE",
+            init: function() {
+                const destStation = dir === 'A' ? 'B' : 'A';
+                resumeTrainMovement(
+                    () => { setSig(destStation, 'Wj', 'red'); msg("POCIĄG MINĄŁ SEMAFOR WJAZDOWY - SYGNAŁ WRÓCIŁ DO STANU STÓJ"); },
+                    () => { msg("POCIĄG BEZPIECZNIE WTOCZYŁ SIĘ W STACJĘ DOCELOWĄ"); changeState(States.STAN_ZWOLNIENIE_BLOKADY); }
+                );
+            },
+            setupView: function() { const side = dir === 'A' ? 'right' : 'left'; setDots(`arr_A_${side}`, 'red'); setDots(`arr_B_${side}`, 'red'); }
+        },
+        STAN_ZWOLNIENIE_BLOKADY: {
+            name: "STAN_ZWOLNIENIE_BLOKADY",
+            init: function() { const destStation = dir === 'A' ? 'B' : 'A'; setKoPLamp(destStation, true); },
+            setupView: function() {
+                const side = dir === 'A' ? 'right' : 'left'; const destStation = dir === 'A' ? 'B' : 'A';
+                setDots(`arr_A_${side}`, 'red'); setDots(`arr_B_${side}`, 'red');
+                enableBtn(`B_${destStation}_dKo`); enableBtn(`B_${destStation}_Blk`);
+            },
+            on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { increment('dKo', st); } },
+            on_Blk: function(st) {
+                const destStation = dir === 'A' ? 'B' : 'A';
+                if (st === destStation && counters[`dKo_${destStation}`] > history[history.length-1].counters[`dKo_${destStation}`]) {
+                    setKoPLamp(destStation, false);
+                    msg("STACJA ODBIORCZA POTWIERDZIŁA ZWOLNIENIE BLOKADY (Ko)");
+                    changeState(States.STAN_ZWOLNIENIE_POTWIERDZONE);
+                }
+            }
+        },
+        STAN_ZWOLNIENIE_POTWIERDZONE: {
+            name: "STAN_ZWOLNIENIE_POTWIERDZONE",
+            setupView: function() {
+                const side = dir === 'A' ? 'right' : 'left';
+                setDots(`arr_A_${side}`, 'white blink'); setDots(`arr_B_${side}`, 'white blink');
+                enableBtn(`B_${dir}_dPo`); enableBtn(`B_${dir}_Poz`);
+            },
+            on_dPo: function(st) { if (st === dir) { increment('dPo', st); } },
+            on_Poz: function(st) {
+                if (st === dir && counters[`dPo_${dir}`] > history[history.length-1].counters[`dPo_${dir}`]) {
+                    msg("STACJA WYPRAWIAJĄCA ODKLIKAŁA BLOKADĘ (Po). BLOKADA WRACA DO STANU ZASADNICZEGO.");
+                    changeState(States.STAN_ZASADNICZY);
+                }
+            }
         }
     };
 
-    window.onload = function() { 
-        hardReset(); 
+    // Uruchomienie makiety po załadowaniu drzewa DOM
+    window.onload = function() {
+        hardReset();
     };
 </script>
+
 </body>
 </html>
