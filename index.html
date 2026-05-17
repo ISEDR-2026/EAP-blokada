@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=1100">
-    <title>EAP Simulator v8.7 - Final Version</title>
+    <title>EAP Simulator  - Creator of Adria </title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Azeret+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -36,7 +36,7 @@
             border: 4px solid #333; 
             border-radius: 8px; 
             width: 100%; 
-            min-width: 1080px; /* Sztywne minimum, żeby elementy się nie łamały */
+            min-width: 1080px; 
             max-width: 1280px; 
             height: auto;
             box-shadow: 0 0 50px rgba(0,0,0,0.9); 
@@ -751,7 +751,7 @@
             name: "STAN_WJAZD_NA_ZIELONE_PO_SZ_WYJEZDZIE",
             showGoBtn: true,
             setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_dKo`); },
-            handleGo: function() { const destStation = dir === 'A' ? 'B' : 'A'; msg("POCIĄG WJEŻDŻA PŁYNNIE W STACJĘ KOŃCOWĄ. ODBLOKOWAŁA SIĘ ZASTAWKA NAD BLOKIEM KOŃCOWYM"); updatePulpitView(); resumeTrainMovement( null, () => { setSig(destStation, 'Wj', 'red'); }, () => { changeState(States.STAN_BLOKADA_UWIĘZIONA_WARIANT_MIESZANY); } ); },
+            handleGo: function() { const destStation = dir === 'A' ? 'B' : 'A'; msg("POCIĄG WJEŻDŻA PŁYNNIE W STACJĘ KOŃCOWĄ. Blokada zablokowana"); updatePulpitView(); resumeTrainMovement( null, () => { setSig(destStation, 'Wj', 'red'); }, () => { changeState(States.STAN_BLOKADA_UWIĘZIONA_WARIANT_MIESZANY); } ); },
             on_dKo: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if(st === destStation) { increment('dKo', st); lockEONActive(st); } }
         },
         STAN_WJAZD_NA_SZ_WARIANT_MIESZANY: {
