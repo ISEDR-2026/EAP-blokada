@@ -733,9 +733,10 @@
         },
         STAN_KONCOWY_AUTOMAT_KOP: {
             name: "STAN_KONCOWY_AUTOMAT_KOP",
-            init: function() { const destStation = dir === 'A' ? 'B' : 'A'; setKoPLamp(destStation, true); msg("POCIĄG PRZYJECHAŁ. BLOKADA KOŃCOWA ODBLOKOWANA NA STACJI " + destStation); },
+`
+            init: function() { const destStation = dir === 'A' ? 'B' : 'A'; setKoPLamp(destStation, true); msg("POCIĄG PRZYJECHAŁ. BLOK KOŃCOWY GOTOWY DO ZAPLOKOWANIA " + destStation); },
             setupView: function() { const destStation = dir === 'A' ? 'B' : 'A'; enableBtn(`B_${destStation}_Blk`); },
-            on_Blk: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { hardReset(); msg("ZWROT BLOKADY KOŃCOWEJ ZAKOŃCZONY SUKCESEM. RESET SYSTEMU."); } }
+            on_Blk: function(st) { const destStation = dir === 'A' ? 'B' : 'A'; if (st === destStation) { hardReset(); msg("BLOK KOŃCOWY ZABLOKOWANY  PRZEJAZD ZAKOŃCZONY SUKCESEM. RESET SYSTEMU."); } }
         },
         STAN_WYJAZD_NA_SZ: {
             name: "STAN_WYJAZD_NA_SZ",
