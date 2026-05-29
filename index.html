@@ -462,4 +462,665 @@
         Object.keys(counters).forEach(k => { const el = document.getElementById(`cnt_${k}`); if(el) el.innerText = String(counters[k]).padStart(3, '0'); });
         const t = document.getElementById('train-core');
         t.style.left = prev.trainPos; t.style.display = prev.trainDisplay; t.innerHTML = prev.trainHTML;
-        prev.signals.forEach
+        prev.signals.forEach(s => { const el = document.getElementById(s.id); if(el) el.className = s.className; });
+        prev.eonClasses.forEach(e => { const el = document.getElementById(e.id); if(el) el.className = e.className; });
+        changeState(States[prev.stateName], false);
+        updateEONVisibility();
+        if (history.length === 0) document.getElementById('btn-undo').disabled = true;
+    }
+
+    function triggerBtn(type, st) {
+        if (currentState && typeof currentState[`on_${type}`] === 'function') {
+            saveState();
+            currentState[`on_${type}`](st);
+        }
+    }
+
+    function changeState(newState, runInit = true) {
+        currentState = newState;
+        if (runInit && typeof currentState.init === 'function') { currentState.init(); }
+        updatePulpitView();
+        updateEONVisibility();
+    }
+
+    function updatePulpitView() {
+        disableAllButtons();
+        enableBtn('B_A_Sz'); enableBtn('B_B_Sz');
+        if (currentState && typeof currentState.setupView === 'function') { currentState.setupView(); }
+        const showGo = currentState && typeof currentState.handleGo === 'function' && currentState.showGoBtn;
+        document.getElementById('btn-go').style.display = showGo ? 'block' : 'none';
+
+        const pwlA = document.getElementById('PWL_A');
+        const pwlB = document.getElementById('PWL_B');
+        if (pwlA) pwlA.className = (pwlActive && dir === 'A') ? 'lamp-dioda white' : 'lamp-dioda';
+        if (pwlB) pwlB.className = (pwlActive && dir === 'B') ? 'lamp-dioda white' : 'lamp-dioda';
+    }
+
+    function getAbsoluteTargetLeft(semaphoreId, direction) {
+        const container = document.getElementById('track-layout-container');
+        const train = document.getElementById('train-core');
+        const sigBox = document.getElementById(semaphoreId);
+        if(!container || !train || !sigBox) return 0;
+
+        const totalWidth = container.offsetWidth;
+        const trainWidth = 140; 
+        const targetOffset = 15; 
+
+        const sigCenter = sigBox.offsetLeft + (sigBox.offsetWidth / 2);
+
+        let pxLeft = 0;
+        if (direction === 'A') {
+            pxLeft = sigCenter - targetOffset - trainWidth;
+        } else {
+            pxLeft = sigCenter + targetOffset;
+        }
+
+        return (pxLeft / totalWidth) * 100;
+    }
+
+    function setupTrainGraphics() {
+        const t = document.getElementById('train-core');
+        t.style.display = 'block';
+        if (dir === 'A') {
+            t.innerHTML = '🚃🚃<span style="display:inline-block; transform: scaleX(-1);">🚂</span>';
+            t.style.left = getAbsoluteTargetLeft('sig-F1', 'A') + '%';
+        } else {
+            t.innerHTML = '🚂🚃🚃';
+            t.style.left = getAbsoluteTargetLeft('sig-B1', 'B') + '%';
+        }
+    }
+
+    function startTrainMovement(onPassedDepartureSig, onReachedEntrySig, onPassedEntrySig, onStationArrived) {
+        const t = document.getElementById('train-core');
+        if (moveInterval) clearInterval(moveInterval);
+        
+        const targetSig = (dir === 'A') ? 'sig-A12' : 'sig-G12';
+        const stopPct = getAbsoluteTargetLeft(targetSig, dir);
+        const depSigCenter = document.getElementById(dir === 'A' ? 'sig-F1' : 'sig-B1').offsetLeft;
+        const containerWidth = document.getElementById('track-layout-container').offsetWidth;
+        moveInterval = setInterval(() => {
+            let posPct = parseFloat(t.style.left);
+            const step = 0.6; 
+            
+            if (dir === 'A') {
+                posPct += step;
+                t.style.left = posPct + '%';
+                
+                let curPxRight = (posPct / 100) * containerWidth + 140;
+
+                if (curPxRight >= depSigCenter + 30 && curPxRight <= depSigCenter + 110) {
+                    document.getElementById('EON_WyA').classList.add('active');
+                } else {
+                    document.getElementById('EON_WyA').classList.remove('active');
+                }
+
+                if (curPxRight > depSigCenter) {
+                    if(onPassedDepartureSig) { onPassedDepartureSig(); onPassedDepartureSig = null; }
+                }
+
+                if (posPct >= stopPct) {
+                    clearInterval(moveInterval);
+                    t.style.left = stopPct + '%';
+                    if(onReachedEntrySig) { onReachedEntrySig(); }
+                }
+            } else {
+                posPct -= step;
+                t.style.left = posPct + '%';
+
+                let curPxLeft = (posPct / 100) * containerWidth;
+                if (curPxLeft <= depSigCenter - 30 && curPxLeft >= depSigCenter - 110) {
+                    document.getElementById('EON_WyB').classList.add('active');
+                } else {
+                    document.getElementById('EON_WyB').classList.remove('active');
+                }
+
+                if (curPxLeft < depSigCenter) {
+                    if(onPassedDepartureSig) { onPassedDepartureSig(); onPassedDepartureSig = null; }
+                }
+
+                if (posPct <= stopPct) {
+                    clearInterval(moveInterval);
+                    t.style.left = stopPct + '%';
+                    if(onReachedEntrySig) { onReachedEntrySig(); }
+                }
+            }
+        }, 30);
+    }
+
+    function resumeTrainMovement(onPassedEntrySig, onStationArrived) {
+        const t = document.getElementById('train-core');
+        if (moveInterval) clearInterval(moveInterval);
+
+        const targetSig = (dir === 'A') ? 'sig-A12' : 'sig-G12';
+        const wjSigCenter = document.getElementById(targetSig).offsetLeft;
+        const containerWidth = document.getElementById('track-layout-container').offsetWidth;
+
+        moveInterval = setInterval(() => {
+            let posPct = parseFloat(t.style.left);
+            const step = 0.6;
+            
+            if (dir === 'A') {
+                posPct += step;
+                t.style.left = posPct + '%';
+                
+                let curPxRight = (posPct / 100) * containerWidth + 140;
+
+                if (curPxRight >= wjSigCenter && curPxRight <= wjSigCenter + 120) {
+                    if (eonLockedStation === 'B') clearLockedEON('B');
+                    document.getElementById('EON_WjB').classList.add('active');
+                } else {
+                    document.getElementById('EON_WjB').classList.remove('active');
+                }
+
+                if (curPxRight > wjSigCenter) {
+                    if(onPassedEntrySig) { onPassedEntrySig(); onPassedEntrySig = null; }
+                }
+
+                if (posPct > 82) {
+                    clearInterval(moveInterval);
+                    t.style.display = 'none';
+                    if(onStationArrived) onStationArrived();
+                }
+            } else {
+                posPct -= step;
+                t.style.left = posPct + '%';
+
+                let curPxLeft = (posPct / 100) * containerWidth;
+
+                if (curPxLeft <= wjSigCenter && curPxLeft >= wjSigCenter - 120) {
+                    if (eonLockedStation === 'A') clearLockedEON('A');
+                    document.getElementById('EON_WjA').classList.add('active');
+                } else {
+                    document.getElementById('EON_WjA').classList.remove('active');
+                }
+
+                if (curPxLeft < wjSigCenter) {
+                    if(onPassedEntrySig) { onPassedEntrySig(); onPassedEntrySig = null; }
+                }
+
+                if (posPct < 8) {
+                    clearInterval(moveInterval);
+                    t.style.display = 'none';
+                    if(onStationArrived) onStationArrived();
+                }
+            }
+        }, 30);
+    }
+
+    function hardReset() {
+        if(moveInterval) clearInterval(moveInterval);
+        dir = null;
+        pwlActive = false;
+        pwlFlash = false;
+        eonLockedStation = null;
+        document.querySelectorAll('.light').forEach(l => l.className = 'light');
+        document.querySelectorAll('.light[id*="_R"]').forEach(l => l.className = 'light red');
+        document.getElementById('train-core').style.display = 'none';
+        document.querySelectorAll('.eon-container').forEach(e => {
+            e.classList.remove('active');
+            e.classList.remove('locked-active');
+        });
+        setKoPLamp('A', false);
+        setKoPLamp('B', false);
+        setDots('arr_A_right', '');
+        setDots('arr_A_left', '');
+        setDots('arr_B_right', '');
+        setDots('arr_B_left', '');
+        document.getElementById('log').innerHTML = "";
+        msg("SYSTEM SRK GOTOWY.");
+        changeState(States.STAN_ZASADNICZY, false);
+        updateEONVisibility();
+    }
+
+    /* MASZYNA STANÓW SYSTEMU EAP */
+    const States = {
+        STAN_ZASADNICZY: {
+            name: "STAN_ZASADNICZY",
+            init: function() {
+                hardReset();
+            },
+            setupView: function() {
+                enableBtn('B_A_Wbl');
+                enableBtn('B_B_Wbl');
+            },
+            on_Wbl: function(st) {
+                dir = st;
+                changeState(States.STAN_ZADANIE_BLOKADY);
+                msg("WZBUDZONO BLOKADĘ WYSŁANO ZAPYTANIE O WOLNĄ DROGĘ");
+            },
+            on_Sz: function(st) {
+                increment('Sz', st);
+                dir = st;
+                changeState(States.STAN_WYJAZD_NA_SZ);
+            }
+        },
+        STAN_ZADANIE_BLOKADY: {
+            name: "STAN_ZADANIE_BLOKADY",
+            setupView: function() {
+                const side = dir === 'A' ? 'right' : 'left';
+                const destStation = dir === 'A' ? 'B' : 'A';
+                setDots(`arr_A_${side}`, 'white blink');
+                setDots(`arr_B_${side}`, 'white blink');
+                enableBtn(`B_${dir}_Wbl`);
+                enableBtn(`B_${destStation}_Poz`);
+            },
+            on_Wbl: function(st) {
+                if (st === dir) {
+                    changeState(States.STAN_ZASADNICZY);
+                    msg("WBL: WYCOFANIE ŻĄDANIA.");
+                }
+            },
+            on_Poz: function(st) {
+                const destStation = dir === 'A' ? 'B' : 'A';
+                if (st === destStation) {
+                    changeState(States.STAN_BLOKADA_WZBUDZONA);
+                    msg("USTALONO KIERUNEK POTWIERDZONO, ŻE DROGA JEST WOLNA");
+                }
+            },
+            on_Sz: function(st) {
+                increment('Sz', st);
+                if (st === dir) changeState(States.STAN_WYJAZD_NA_SZ);
+            }
+        },
+        STAN_BLOKADA_WZBUDZONA: {
+            name: "STAN_BLOKADA_WZBUDZONA",
+            setupView: function() {
+                const side = dir === 'A' ? 'right' : 'left';
+                setDots(`arr_A_${side}`, 'white');
+                setDots(`arr_B_${side}`, 'white');
+                enableBtn(`B_${dir}_Wyj`);
+                enableBtn(`B_${dir}_Wbl`);
+                enableBtn(`B_${dir}_dPo`);
+            },
+            on_Wbl: function(st) {
+                if (st === dir) {
+                    changeState(States.STAN_ODWOLANIE_POZWOLENIA);
+                    msg("WBL: ŻĄDANIE ODWOŁANIA POZWOLENIA.");
+                }
+            },
+            on_Wyj: function(st) {
+                if (st === dir) {
+                    pwlActive = true;
+                    setSig(dir, 'Wy', 'green');
+                    setupTrainGraphics();
+                    changeState(States.STAN_WYJAZD_NA_ZIELONE);
+                    msg("WYJAZD: PODANO SYGNAŁ ZEZWALAJĄCY.");
+                }
+            },
+            on_dPo: function(st) {
+                if(st === dir) {
+                    increment('dPo', st);
+                    changeState(States.STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU);
+                }
+            },
+            on_Sz: function(st) {
+                increment('Sz', st);
+                if (st === dir) changeState(States.STAN_WYJAZD_NA_SZ);
+            }
+        },
+        STAN_ODWOLANIE_POZWOLENIA: {
+            name: "STAN_ODWOLANIE_POZWOLENIA",
+            setupView: function() {
+                const side = dir === 'A' ? 'right' : 'left';
+                const destStation = dir === 'A' ? 'B' : 'A';
+                setDots(`arr_${dir}_${side}`, 'white');
+                setDots(`arr_${destStation}_${side}`, 'white blink');
+                enableBtn(`B_${destStation}_Wbl`);
+            },
+            on_Wbl: function(st) {
+                const destStation = dir === 'A' ? 'B' : 'A';
+                if (st === destStation) {
+                    hardReset();
+                    msg("WBL KOŃCOWE: BLOKADA COFNIĘTA DO STANU ZASADNICZEGO.");
+                }
+            }
+        },
+        STAN_WYJAZD_NA_ZIELONE: {
+            name: "STAN_WYJAZD_NA_ZIELONE",
+            showGoBtn: true,
+            setupView: function() {
+                const side = dir === 'A' ? 'right' : 'left';
+                const destStation = dir === 'A' ? 'B' : 'A';
+                setDots(`arr_${dir}_${side}`, 'red');
+                setDots(`arr_${destStation}_${side}`, 'red blink');
+                enableBtn(`B_${dir}_dPo`);
+            },
+            handleGo: function() {
+                msg("POCIĄG WYJECHAŁ NA SZLAK");
+                const side = dir === 'A' ? 'right' : 'left';
+                const destStation = dir === 'A' ? 'B' : 'A';
+                updatePulpitView();
+                startTrainMovement(
+                    () => { 
+                        setSig(dir, 'Wy', 'red'); 
+                        setDots(`arr_${dir}_${side}`, 'red');
+                        setDots(`arr_${destStation}_${side}`, 'red');
+                    },
+                    () => { changeState(States.STAN_OCZEKIWANIE_NA_WJAZD_PO_ZIELONYM()); },
+                    null,
+                    null
+                );
+            },
+            on_dPo: function(st) {
+                if (st === dir) {
+                    increment('dPo', st);
+                    changeState(States.STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU);
+                }
+            }
+        },
+        STAN_OCZEKIWANIE_NA_WJAZD_PO_ZIELONYM: function() {
+            return {
+                name: "STAN_OCZEKIWANIE_NA_WJAZD_PO_ZIELONYM",
+                init: function() {
+                    const side = dir === 'A' ? 'right' : 'left';
+                    setDots(`arr_A_${side}`, 'red');
+                    setDots(`arr_B_${side}`, 'red');
+                    msg("POCIĄG ZATRZYMAŁ SIĘ PRZED SEMAFOREM WJAZDOWYM STACJI KOŃCOWEJ.");
+                },
+                setupView: function() {
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    enableBtn(`B_${destStation}_Wj`);
+                    enableBtn(`B_${dir}_dPo`);
+                },
+                on_Wj: function(st) {
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    if (st === destStation) {
+                        setSig(destStation, 'Wj', 'green');
+                        msg("WJAZD: PODANO SYGNAŁ ZEZWALAJĄCY NA STACJI KOŃCOWEJ.");
+                        changeState(States.STAN_WJAZD_PO_ZIELONYM());
+                    }
+                },
+                on_dPo: function(st) {
+                    if (st === dir) {
+                        increment('dPo', st);
+                        changeState(States.STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU);
+                    }
+                }
+            };
+        },
+        STAN_WJAZD_PO_ZIELONYM: function() {
+            return {
+                name: "STAN_WJAZD_PO_ZIELONYM",
+                showGoBtn: true,
+                setupView: function() {
+                    enableBtn(`B_${dir}_dPo`);
+                },
+                handleGo: function() {
+                    msg("POCIĄG WJEŻDŻA NA STACJĘ KOŃCOWĄ");
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    updatePulpitView();
+                    resumeTrainMovement(
+                        () => { setSig(destStation, 'Wj', 'red'); },
+                        () => { changeState(States.STAN_POCIAG_NA_STACJI_PO_ZIELONYM()); }
+                    );
+                },
+                on_dPo: function(st) {
+                    if (st === dir) {
+                        increment('dPo', st);
+                        changeState(States.STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU);
+                    }
+                }
+            };
+        },
+        STAN_POCIAG_NA_STACJI_PO_ZIELONYM: function() {
+            return {
+                name: "STAN_POCIAG_NA_STACJI_PO_ZIELONYM",
+                init: function() {
+                    const side = dir === 'A' ? 'right' : 'left';
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    setDots(`arr_${dir}_${side}`, 'red blink');
+                    setDots(`arr_${destStation}_${side}`, 'red blink');
+                    setKoPLamp(destStation, true);
+                    msg("POCIĄG CAŁY WJECHAŁ W SEMAFORY. ŻĄDANIE BLOKADY KOŃCOWEJ.");
+                },
+                setupView: function() {
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    enableBtn(`B_${destStation}_dKo`);
+                },
+                on_dKo: function(st) {
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    if (st === destStation) {
+                        increment('dKo', st);
+                        setKoPLamp(destStation, false);
+                        hardReset();
+                        msg("DKO: BLOKADA ZAMKNIĘTA. SZLAK WOLNY.");
+                    }
+                }
+            };
+        },
+        STAN_WYJAZD_NA_SZ: {
+            name: "STAN_WYJAZD_NA_SZ",
+            showGoBtn: true,
+            init: function() {
+                pwlActive = true;
+                setSig(dir, 'Wy', 'white-blink');
+                setupTrainGraphics();
+                msg("WYJAZD NA SZ: PODANO SYGNAŁ ZASTĘPCZY.");
+            },
+            setupView: function() {
+                enableBtn(`B_${dir}_dPo`);
+                enableBtn(`B_${dir}_Sz`);
+            },
+            handleGo: function() {
+                msg("POCIĄG WYJECHAŁ NA SZLAK NA SYGNAŁ ZASTĘPCZY");
+                const side = dir === 'A' ? 'right' : 'left';
+                const destStation = dir === 'A' ? 'B' : 'A';
+                updatePulpitView();
+                startTrainMovement(
+                    () => { setSig(dir, 'Wy', 'red'); },
+                    () => { changeState(States.STAN_OCZEKIWANIE_NA_WJAZD_PO_SZ()); },
+                    null,
+                    null
+                );
+            },
+            on_Sz: function(st) {
+                if (st === dir) {
+                    increment('Sz', st);
+                    setSig(dir, 'Wy', 'white-blink');
+                    msg("SZ: PONOWNE PODANIE SYGNAŁU ZASTĘPCZEGO.");
+                }
+            },
+            on_dPo: function(st) {
+                if (st === dir) {
+                    increment('dPo', st);
+                    changeState(States.STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU);
+                }
+            }
+        },
+        STAN_OCZEKIWANIE_NA_WJAZD_PO_SZ: function() {
+            return {
+                name: "STAN_OCZEKIWANIE_NA_WJAZD_PO_SZ",
+                init: function() {
+                    msg("POCIĄG ZATRZYMAŁ SIĘ PRZED SEMAFOREM WJAZDOWYM. SYSTEM NIE WIE O JEGO POZYCJI (JAZDA NA SZ).");
+                },
+                setupView: function() {
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    enableBtn(`B_${destStation}_Wj`);
+                    enableBtn(`B_${destStation}_Sz`);
+                    enableBtn(`B_${dir}_dPo`);
+                },
+                on_Wj: function(st) {
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    if (st === destStation) {
+                        setSig(destStation, 'Wj', 'green');
+                        msg("WJAZD: PODANO SYGNAŁ ZEZWALAJĄCY NA STACJI KOŃCOWEJ.");
+                        changeState(States.STAN_WJAZD_PO_SZ_NA_ZIELONE());
+                    }
+                },
+                on_Sz: function(st) {
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    if (st === destStation) {
+                        increment('Sz', st);
+                        setSig(destStation, 'Wj', 'white-blink');
+                        msg("WJAZD NA SZ: PODANO SYGNAŁ ZASTĘPCZY NA STACJI KOŃCOWEJ.");
+                        changeState(States.STAN_WJAZD_PO_SZ_NA_SZ());
+                    }
+                },
+                on_dPo: function(st) {
+                    if (st === dir) {
+                        increment('dPo', st);
+                        changeState(States.STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU);
+                    }
+                }
+            };
+        },
+        STAN_WJAZD_PO_SZ_NA_ZIELONE: function() {
+            return {
+                name: "STAN_WJAZD_PO_SZ_NA_ZIELONE",
+                showGoBtn: true,
+                setupView: function() {
+                    enableBtn(`B_${dir}_dPo`);
+                },
+                handleGo: function() {
+                    msg("POCIĄG WJEŻDŻA NA STACJĘ KOŃCOWĄ");
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    updatePulpitView();
+                    resumeTrainMovement(
+                        () => { setSig(destStation, 'Wj', 'red'); },
+                        () => { changeState(States.STAN_POCIAG_NA_STACJI_PO_SZ()); }
+                    );
+                },
+                on_dPo: function(st) {
+                    if (st === dir) {
+                        increment('dPo', st);
+                        changeState(States.STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU);
+                    }
+                }
+            };
+        },
+        STAN_WJAZD_PO_SZ_NA_SZ: function() {
+            return {
+                name: "STAN_WJAZD_PO_SZ_NA_SZ",
+                showGoBtn: true,
+                setupView: function() {
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    enableBtn(`B_${dir}_dPo`);
+                    enableBtn(`B_${destStation}_Sz`);
+                },
+                handleGo: function() {
+                    msg("POCIĄG WJEŻDŻA NA STACJĘ KOŃCOWĄ NA SYGNAŁ ZASTĘPCZY");
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    updatePulpitView();
+                    resumeTrainMovement(
+                        () => { setSig(destStation, 'Wj', 'red'); },
+                        () => { changeState(States.STAN_POCIAG_NA_STACJI_PO_SZ()); }
+                    );
+                },
+                on_Sz: function(st) {
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    if (st === destStation) {
+                        increment('Sz', st);
+                        setSig(destStation, 'Wj', 'white-blink');
+                        msg("WJAZD NA SZ: PONOWNE PODANIE SYGNAŁU ZASTĘPCZEGO NA WJAZD.");
+                    }
+                },
+                on_dPo: function(st) {
+                    if (st === dir) {
+                        increment('dPo', st);
+                        changeState(States.STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU);
+                    }
+                }
+            };
+        },
+        STAN_POCIAG_NA_STACJI_PO_SZ: function() {
+            return {
+                name: "STAN_POCIAG_NA_STACJI_PO_SZ",
+                init: function() {
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    lockEONActive(destStation);
+                    msg("POCIĄG WJECHAŁ (NA SZ). AKTYWOWANA BLOKADA EON NA WJAZDZIE. WYMAGANE UŻYCIE DPO + POZ.");
+                },
+                setupView: function() {
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    enableBtn(`B_${destStation}_dPo`);
+                    enableBtn(`B_${destStation}_Poz`);
+                },
+                on_dPo: function(st) {
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    if (st === destStation) {
+                        increment('dPo', st);
+                        changeState(States.STAN_ZWALNIANIE_EON_PO_SZ());
+                    }
+                }
+            };
+        },
+        STAN_ZWALNIANIE_EON_PO_SZ: function() {
+            return {
+                name: "STAN_ZWALNIANIE_EON_PO_SZ",
+                setupView: function() {
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    enableBtn(`B_${destStation}_Poz`);
+                },
+                on_Poz: function(st) {
+                    const destStation = dir === 'A' ? 'B' : 'A';
+                    if (st === destStation) {
+                        clearLockedEON(destStation);
+                        hardReset();
+                        msg("EON ZWOLNIONY PRZYCISKIEM POZ. SZLAK WOLNY.");
+                    }
+                }
+            };
+        },
+        STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU: {
+            name: "STAN_AWARYJNE_ZABLOKOWANIE_SZLAKU",
+            showGoBtn: true,
+            init: function() {
+                const side = dir === 'A' ? 'right' : 'left';
+                setDots('arr_A_right', ''); setDots('arr_A_left', ''); setDots('arr_B_right', ''); setDots('arr_B_left', '');
+                setDots(`arr_A_${side}`, 'red'); setDots(`arr_B_${side}`, 'red');
+                const currentWySig = document.getElementById(`L_Wy${dir}_W`);
+                if (currentWySig && currentWySig.classList.contains('white')) {
+                    setSig(dir, 'Wy', 'white-blink');
+                    const oppStation = dir === 'A' ? 'B' : 'A';
+                    setSig(oppStation, 'Wy', 'red');
+                } else {
+                    setSig('A', 'Wy', 'red');
+                    setSig('B', 'Wy', 'red');
+                }
+                msg("UŻYTO PRZYCISKU DPO");
+            },
+            setupView: function() {
+                enableBtn(`B_${dir}_dPo`);
+                enableBtn(`B_${dir}_Poz`);
+                enableBtn(`B_${dir}_Sz`);
+            },
+            handleGo: function() {
+                msg("POCIĄG WYJEŻDŻA NA SZLAK NA SYGNAŁ ZASTĘPCZY");
+                updatePulpitView();
+                startTrainMovement(
+                    () => { setSig(dir, 'Wy', 'red'); },
+                    () => { changeState(States.STAN_OCZEKIWANIE_NA_WJAZD_PO_ZIELONYM()); },
+                    null,
+                    null
+                );
+            },
+            on_Sz: function(st) {
+                if(st === dir) {
+                    increment('Sz', st);
+                    setSig(dir, 'Wy', 'white-blink');
+                    msg("WYJAZD NA SZ: PONOWNE PODANIE SYGNAŁU ZASTĘPCZEGO IN dPo.");
+                }
+            },
+            on_dPo: function(st) {
+                if (st === dir) {
+                    increment('dPo', st);
+                    msg("DPO: PONOWIENIE BLOKADY AWARYJNEJ.");
+                }
+            },
+            on_Poz: function(st) {
+                if (st === dir) {
+                    hardReset();
+                    msg("POZ: ANULOWANO STAN AWARYJNY, BLOKADA RESETOWANA.");
+                }
+            }
+        }
+    };
+
+    // START APLIKACJI
+    document.addEventListener("DOMContentLoaded", () => {
+        changeState(States.STAN_ZASADNICZY, true);
+    });
+</script>
+
+</body>
+</html>
